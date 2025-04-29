@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>我的音乐</title>
+    <link href="css/home.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>我的音乐</h1>
+        </div>
+        <div class="section">
+            <h2>我的歌单</h2>
+            <ul id="my-playlists">
+                <!-- 我的歌单将动态插入到这里 -->
+            </ul>
+        </div>
+        <div class="section">
+            <h2>最近播放</h2>
+            <ul id="recently-played">
+                <!-- 最近播放的歌曲将动态插入到这里 -->
+            </ul>
+        </div>
+    </div>
+    <script>
+        // 示例：动态加载我的歌单
+        document.getElementById('my-playlists').innerHTML = `
+            <li><a href="#">我喜欢的音乐</a></li>
+            <li><a href="#">每日推荐</a></li>
+        `;
+    </script>
+</body>
+</html>
