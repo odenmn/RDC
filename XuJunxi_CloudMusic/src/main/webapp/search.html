@@ -3,18 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <title>发现</title>
-    <link href="css/home.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/search.css"></link>
 </head>
 <body>
 <div id="app" class="container">
-    <div class="header">
+    <div class="header" style="text-align: center">
         <h1>搜索</h1>
     </div>
-    <div class="search-bar">
-        <input type="text" class="search-input" v-model="keyword" id="search-input" placeholder="搜索歌曲、专辑、用户、歌单">
-        <button class="search-button" onclick="search()">搜索</button>
+    <div class="search-bar" >
+        <input type="text" class="search-input" v-model="keyword" id="search-input" placeholder="搜索歌曲、专辑、用户、歌单" style="width: 250px;">
+        <button class="search-button" @click="search">搜索</button>
     </div>
-    <div>
+    <div class="tab-buttons">
+        <!-- 登录按钮。使用动态类绑定，当 isLoginTab 为 true 时添加 active 类 -->
+        <!-- 点击按钮时，将 isLoginTab 设置为 true，以显示登录表单 -->
+        <button :class="{ active: type===1 }" @click="type=1">歌曲</button>
+        <!-- 注册按钮。使用动态类绑定，当 isLoginTab 为 false 时添加 active 类 -->
+        <!-- 点击按钮时，将 isLoginTab 设置为 false，以显示注册表单 -->
+        <button :class="{ active: type===2 }" @click="type=2">专辑</button>
+        <button :class="{ active: type===3 }" @click="type=3">用户</button>
+
+    </div>
+    <div v-if="type===1">
         <template>
             <el-table
                     :data="tableData"
@@ -30,7 +40,7 @@
                         align="center">
                 </el-table-column>
                 <el-table-column
-                        prop="author"
+                        prop="authorName"
                         label="作者"
                         align="center">
                 </el-table-column>
@@ -38,7 +48,7 @@
                         label="查看"
                         align="center">
                     <template slot-scope="scope">
-<!--                        <el-button type="primary" @click="processingReview(scope.row.uploadWorkId,scope.row.id)">处理</el-button>-->
+                        <el-button type="primary" @click="viewSong(scope.row.id)">查看</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -51,7 +61,7 @@
                 :page-sizes="[5, 10, 15, 20]"
                 :page-size="5"
                 layout="total, sizes, prev, pager, next, jumper"
-                :total="500">
+                :total="totalCount">
         </el-pagination>
     </div>
 </div>
@@ -63,15 +73,16 @@
     new Vue({
         el: '#app',
         data: {
+            type : 1,
             keyword: '',
             currentPage: 1,
             pageSize: 5,
             tableData: [],
-            tableCount: '',
+            totalCount: '',
         },
         methods: {
             search() {
-                axios.get('/XuJunxi_CloudMusic/song/searchSongsByTitle', new URLSearchParams({
+                axios.post('/XuJunxi_CloudMusic/song/searchSongsByTitle', new URLSearchParams({
                     keyword: this.keyword,
                     currentPage: this.currentPage,
                     pageSize: this.pageSize
@@ -82,21 +93,22 @@
                 })
                     .then(response => {
                         this.tableData = response.data.pageBean.rows;
-                        this.tableCount = response.data.pageBean.totalCount;
+                        this.totalCount = response.data.pageBean.totalCount;
                     })
                     .catch(error => {
                         console.error('搜索请求出错:', error);
                     })
             },
+            viewSong(songId) {
+                window.location.href = `song.html?id=${songId}`;
+            },
             handleSizeChange(val) {
-                // console.log(`每页 ${val} 条`);
                 this.currentPage=val;
-                this.fetchReviews();
+                this.search();
             },
             handleCurrentChange(val) {
-                // console.log(`当前页: ${val}`);
                 this.currentPage=val;
-                this.fetchReviews();
+                this.search();
             }
         }
     })

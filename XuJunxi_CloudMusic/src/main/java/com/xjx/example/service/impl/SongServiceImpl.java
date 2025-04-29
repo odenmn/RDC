@@ -5,6 +5,7 @@ import com.xjx.example.dao.impl.SongDaoImpl;
 import com.xjx.example.entity.PageBean;
 import com.xjx.example.entity.Song;
 import com.xjx.example.service.SongService;
+import com.xjx.example.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +17,7 @@ public class SongServiceImpl implements SongService {
 
     private static final Logger logger = LoggerFactory.getLogger(SongServiceImpl.class);
     private final SongDao songDao = new SongDaoImpl();
+    private final UserService userService = new UserServiceImpl();
     @Override
     public Integer addSong(Song song) {
         try {
@@ -92,6 +94,11 @@ public class SongServiceImpl implements SongService {
         try {
             int begin = (currentPage - 1) * pageSize;
             List<Song> songs = songDao.searchSongsByTitle(keyword, begin, pageSize);
+            // 获取作者名
+            for (Song song: songs) {
+                String authorName = userService.getUserById(song.getAuthorId()).getUsername();
+                song.setAuthorName(authorName);
+            }
             int totalCount = songDao.getTotalCountByKeyword(keyword);
             PageBean<Song> pageBean = new PageBean<>();
             pageBean.setTotalCount(totalCount);

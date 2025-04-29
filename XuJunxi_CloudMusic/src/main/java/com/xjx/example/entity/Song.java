@@ -7,6 +7,7 @@ public class Song {
     private Integer id;
     private String title;
     private Integer authorId;
+    private String authorName;
     private Integer albumId = 0;// 专辑ID，默认为0表示无专辑
     private LocalDateTime uploadTime; // 上传时间
     private String genre; // 音乐类型
@@ -46,6 +47,14 @@ public class Song {
 
     public void setAuthorId(Integer authorId) {
         this.authorId = authorId;
+    }
+
+    public String getAuthorName() {
+        return authorName;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
     }
 
     public Integer getAlbumId() {

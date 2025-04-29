@@ -82,8 +82,11 @@ public class SongDaoImpl implements SongDao {
 
     @Override
     public List<Song> searchSongsByTitle(String keyword,int begin, int pageSize) {
-        String sql = "SELECT * FROM song WHERE title LIKE ? AND is_public = true LIMIT ?, ?";
         List<Song> songs = new ArrayList<>();
+        if (keyword == null || keyword.isEmpty()) {
+            return songs;
+        }
+        String sql = "SELECT * FROM song WHERE title LIKE ? AND is_public = true LIMIT ?, ?";
         try (Connection connection = JDBCUtil.getConnection();
              ResultSet rs = JDBCUtil.executeQuery(connection, sql, "%" + keyword + "%", begin, pageSize)) {
                 while (rs.next()) {
@@ -110,6 +113,9 @@ public class SongDaoImpl implements SongDao {
 
     @Override
     public int getTotalCountByKeyword(String keyword) throws Exception {
+        if (keyword == null || keyword.isEmpty()) {
+            return 0;
+        }
         String sql = "SELECT COUNT(*) FROM song WHERE title LIKE ? AND is_public = true";
         try (Connection connection = JDBCUtil.getConnection();
              ResultSet rs = JDBCUtil.executeQuery(connection, sql, "%" + keyword + "%")) {
