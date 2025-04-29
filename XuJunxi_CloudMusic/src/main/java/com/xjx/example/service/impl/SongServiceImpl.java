@@ -80,6 +80,16 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    public List<Song> getSongsByAuthorId(int authorId) {
+        try {
+            return songDao.getSongsByAuthorId(authorId);
+        } catch (Exception e) {
+            logger.warn("通过作者ID获取歌曲失败: {}", authorId, e);
+            return null;
+        }
+    }
+
+    @Override
     public List<Song> getAllSongs() {
         try {
             return songDao.getAllSongs();

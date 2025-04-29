@@ -66,6 +66,21 @@ public class SongDaoImpl implements SongDao {
     }
 
     @Override
+    public List<Song> getSongsByAuthorId(int authorId) {
+        String sql = "SELECT * FROM song WHERE author_id = ?";
+        List<Song> songs = new ArrayList<>();
+        try (Connection connection = JDBCUtil.getConnection();
+            ResultSet rs = JDBCUtil.executeQuery(connection, sql, authorId)){
+            while (rs.next()) {
+                songs.add(mapResultSetToSong(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return songs;
+    }
+
+    @Override
     public List<Song> getAllSongs() {
         String sql = "SELECT * FROM song WHERE is_public = true";
         List<Song> songs = new ArrayList<>();

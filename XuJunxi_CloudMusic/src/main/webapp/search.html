@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>发现</title>
-    <link rel="stylesheet" href="css/search.css"></link>
+    <link rel="stylesheet" href="css/search.css">
 </head>
 <body>
 <div id="app" class="container">
@@ -15,11 +15,7 @@
         <button class="search-button" @click="search">搜索</button>
     </div>
     <div class="tab-buttons">
-        <!-- 登录按钮。使用动态类绑定，当 isLoginTab 为 true 时添加 active 类 -->
-        <!-- 点击按钮时，将 isLoginTab 设置为 true，以显示登录表单 -->
         <button :class="{ active: type===1 }" @click="type=1">歌曲</button>
-        <!-- 注册按钮。使用动态类绑定，当 isLoginTab 为 false 时添加 active 类 -->
-        <!-- 点击按钮时，将 isLoginTab 设置为 false，以显示注册表单 -->
         <button :class="{ active: type===2 }" @click="type=2">专辑</button>
         <button :class="{ active: type===3 }" @click="type=3">用户</button>
 
