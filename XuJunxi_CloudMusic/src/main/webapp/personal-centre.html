@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>个人中心</title>
+    <link href="css/personal-centre.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div id="app" class="container">
+        <div class="header">
+            <h1>个人中心</h1>
+        </div>
+        <!-- 用户信息展示区域 -->
+        <div class="section">
+            <h2>用户信息</h2>
+            <div v-if="user">
+                <p>用户名：{{ user.username }}</p>
+                <p>手机号码：{{ user.phone }}</p>
+                <p>头像：{{ user.avatar }}</p>
+                <p>注册时间：{{ createdTime }}</p>
+                <p>是否为音乐人：{{ user.role == 1 ? '是' : '否' }}</p>
+            </div>
+            <div v-else>
+                <p>加载中...</p>
+            </div>
+        </div>
+        <div class="section">
+            <h2>修改密码</h2>
+            <form @submit.prevent="resetPassword">
+                <label for="email">邮箱：</label>
+                <input type="email" id="email" v-model="resetEmail" name="email" required>
+                <br>
+                <label for="newPassword">新密码：</label>
+                <input type="password" id="newPassword" v-model="newPassword" name="newPassword" required>
+                <br>
+                <label for="confirmPassword">确认密码：</label>
+                <input type="password" id="confirmPassword" v-model="confirmPassword" name="confirmPassword" required>
+                <br>
+                <button type="submit">修改密码</button>
+            </form>
+            <p v-if="passwordResetMessage" class="password-reset-message">{{ passwordResetMessage }}</p> <!-- 显示密码重置结果信息 -->
+        </div>
+    </div>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                user: null,
+                createdTime: '',
+                resetEmail: '',
+                newPassword: '',
+                confirmPassword: '',
+                passwordResetMessage: ''
+            },
+            created() {
+                this.fetchUserInfo(); // 页面加载时获取用户信息
+            },
+            methods: {
+                fetchUserInfo() {
+                    axios.get('/XuJunxi_CloudMusic/user/displayPersonalInfo') // 调用后端接口获取用户信息
+                        .then(response => {
+                            this.user = response.data.user; // 将返回的用户信息赋值给 user
+                            this.createdTime = response.data.createdTime;
+                        })
+                        .catch(error => {
+                            console.error('获取用户信息失败:', error);
+                        });
+                },
+                updateUserInfo() {
+                    axios.post('/user/updateUser', this.user)
+                        .then(response => {
+                            alert('用户信息更新成功');
+                        })
+                        .catch(error => {
+                            console.error('更新用户信息失败:', error);
+                        });
+                },
+                resetPassword() {
+                    axios.post('/XuJunxi_CloudMusic/user/resetPassword', new URLSearchParams({
+                        email: this.resetEmail,
+                        newPassword: this.newPassword,
+                        confirmPassword: this.confirmPassword
+                    }),{
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    }).then(response => {
+                            if (response.data.success){
+                                alert('密码重置成功，请重新登录');
+                                window.location.href = 'login.html';
+                            }   else {
+                                this.passwordResetMessage = response.data.message;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('密码重置失败:', error);
+                        });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
