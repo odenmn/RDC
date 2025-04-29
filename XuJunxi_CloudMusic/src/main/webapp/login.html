@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <link href="css/login.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div id="loginDiv" style="height: 450px">
+        <form @submit.prevent="login" id="form">
+            <div style="text-align: center; font-size: 48px; font-weight: bold; margin-bottom: 10px;">网易云音乐</div>
+            <br>
+            <h1 id="loginMsg">登录</h1>
+            <div id="errorMsg"  v-if="errorMessage" style="margin-bottom: -10px">{{ errorMessage }}</div>
+            <p>用户名:<input v-model="username" id="username" name="username" type="text"></p>
+            <p>密码:<input v-model="password" id="password" name="password" type="password"></p>
+            <p>记住我:<input v-model="remember" id="remember" name="remember" type="checkbox"></p>
+            <div id="subDiv">
+                <input type="submit" class="button" value="登录">
+                <input type="reset" class="button" value="清空">&nbsp;&nbsp;&nbsp;
+                <a href="register.html">没有账号？</a>
+                <a href="forgetPassword.html">忘记密码？</a>
+            </div>
+        </form>
+    </div>
+    <script>
+        new Vue({
+            el: '#loginDiv',
+            data: {
+                username: '',
+                password: '',
+                remember: false,
+                errorMessage: '',
+                usernameMessage: '',
+                isAdmin: ''
+            },
+            methods: {
+                login() {
+                    axios.post('/XuJunxi_CloudMusic/user/login',  new URLSearchParams({
+                        // 使用new URLSearchParams构造请求体参数，将数据格式化为URL编码形式以便传输
+                        username: this.username,
+                        password: this.password,
+                        remember: this.remember
+                    }), {
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    })
+                        .then(response => {
+                            if (response.data.success) {
+                                this.isAdmin = response.data.isAdmin;
+                                if (this.isAdmin === 2){
+                                    // 管理员登录成功，跳转到管理员页面
+                                    window.location.href = 'admin.html';
+                                }
+                                else {
+                                    // 普通用户登录成功，跳转到用户主页
+                                    window.location.href = 'home.html';
+                                }
+                            } else {
+                                // 登录失败，显示错误信息
+                                this.errorMessage = response.data.message;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('登录请求出错:', error);
+                            this.errorMessage = '请求出错，请稍后重试';
+                        });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
