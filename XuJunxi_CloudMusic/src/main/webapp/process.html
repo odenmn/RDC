@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>审核</title>
+    <link rel="stylesheet" href="css/process.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<div id="app">
+    <template v-if="review && review.content === '歌曲'">
+        <div>
+            <p v-if="song">歌曲名: {{ song.title }}</p>
+        </div>
+        <audio v-if="song" controls="controls" :src="song.audioUrl"></audio>
+        <div>
+            <p v-if="author && author.username">作者: {{ author.username }}</p>
+        </div>
+    </template>
+    <template v-else-if="review">
+        <div>
+
+        </div>
+    </template>
+        <button @click="approveReview(reviewId)">通过</button>
+        <button @click="rejectReview(reviewId)">不通过</button>
+    <div v-if="message" style="margin-bottom: -10px">{{ message }}</div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            reviewId: '',
+            uploadWorkId: '',
+            review : null,
+            song: null,
+            author: null,
+            message: ''
+        },
+        created() {
+            // 获取URL中的id参数
+            const urlParams = new URLSearchParams(window.location.search);
+            this.uploadWorkId = urlParams.get('uploadWorkId');
+            this.reviewId = urlParams.get('reviewId');
+            this.getReviewById(this.reviewId);
+        },
+        watch: {
+            review: {
+                handler(newVal) {
+                    if (newVal && newVal.content === '歌曲') {
+                        this.getSongById(this.uploadWorkId);
+                    } else if (newVal) {
+                        // 获取专辑
+                    }
+                },
+                immediate: true // 立即执行一次
+            }
+        },
+        methods: {
+            getReviewById(id) {
+                axios.post('/XuJunxi_CloudMusic/admin/getReviewById', new URLSearchParams({
+                    reviewId : id
+                }),{
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }).then(response => {
+                    this.review = response.data.review;
+                    console.log(this.review);
+                })
+            },
+            getSongById(id) {
+                axios.post('/XuJunxi_CloudMusic/song/getSongById', new URLSearchParams({
+                    songId : id
+                }),{
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }).then(response => {
+                        this.song = response.data.song;
+                        console.log(this.song.audioUrl);
+                        this.author = response.data.author;
+                    })
+            },
+            approveReview(id) {
+                axios.post('/XuJunxi_CloudMusic/admin/approveReview', new URLSearchParams({
+                    reviewId : id
+                }),{
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }).then(response => {
+                        if (response.data.success){
+                            alert('歌曲审核设置通过完成');
+                        } else {
+                            alert('歌曲审核通过设置失败');
+                        }
+                        window.location.href = 'admin.html';
+                    })
+            },
+            rejectReview(id) {
+                axios.post('/XuJunxi_CloudMusic/admin/rejectReview', new URLSearchParams({
+                    reviewId : id
+                }),{
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }).then(response => {
+                        if (response.data.success){
+                            alert('歌曲审核设置未通过完成');
+                        } else {
+                            alert('歌曲审核未通过设置失败');
+                        }
+                        alert('歌曲审核未通过');
+                        window.location.href = 'admin.html';
+                    })
+            }
+        }
+    });
+</script>
+</body>
+</html>
