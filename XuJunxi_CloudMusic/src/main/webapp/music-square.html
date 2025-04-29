@@ -21,7 +21,7 @@
             <a href="search.html">搜索</a>
         </div>
         <div class="recommend-section">
-            <a href="recommend.html">每日推荐</a>
+            <h2>每日推荐</h2>
             <div v-if="loading">加载中...</div>
             <div v-else>
                 <div v-for="song in recommendations" :key="song.id" class="song-item">
