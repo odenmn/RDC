@@ -3,32 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <title>我的音乐</title>
-    <link href="css/home.css" rel="stylesheet">
+<!--    <link href="css/home.css" rel="stylesheet">-->
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>我的音乐</h1>
-        </div>
-        <div class="section">
-            <h2>我的歌单</h2>
-            <ul id="my-playlists">
-                <!-- 我的歌单将动态插入到这里 -->
-            </ul>
-        </div>
-        <div class="section">
-            <h2>最近播放</h2>
-            <ul id="recently-played">
-                <!-- 最近播放的歌曲将动态插入到这里 -->
-            </ul>
-        </div>
+<div id="app" class="container">
+    <div class="header">
+        <h1>我的音乐</h1>
     </div>
-    <script>
-        // 示例：动态加载我的歌单
-        document.getElementById('my-playlists').innerHTML = `
-            <li><a href="#">我喜欢的音乐</a></li>
-            <li><a href="#">每日推荐</a></li>
-        `;
-    </script>
+    <h2>我发布的</h2>
+    <div class="tab-buttons">
+        <button :class="{ active: type===1 }" @click="type=1">歌曲</button>
+        <button :class="{ active: type===2 }" @click="type=2">专辑</button>
+    </div>
+    <div v-if="type===1">
+        <template>
+            <el-table
+                    :data="uploadSong"
+                    stripe
+                    style="width: 100%">
+                <el-table-column
+                        type="index"
+                        width="50">
+                </el-table-column>
+                <el-table-column
+                        prop="uploadTime"
+                        label="日期"
+                        align="center"
+                        :formatter="formatTime">
+                </el-table-column>
+                <el-table-column
+                        prop="title"
+                        label="歌名"
+                        align="center">
+                </el-table-column>
+                <el-table-column
+                        label="查看"
+                        align="center">
+                    <template slot-scope="scope">
+                        <el-button type="primary" @click="viewSong(scope.row.id)">查看</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </template>
+    </div>
+    <div v-if="type===2">
+        <template>
+            <el-table
+                    :data="uploadAlbum"
+                    stripe
+                    style="width: 100%">
+                <el-table-column
+                        type="index"
+                        width="50">
+                </el-table-column>
+                <el-table-column
+                        prop="uploadTime"
+                        label="日期"
+                        align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="content"
+                        label="专辑名"
+                        align="center">
+                </el-table-column>
+                <el-table-column
+                        label="查看"
+                        align="center">
+                    <template slot-scope="scope">
+                        <el-button type="primary" @click="viewSong(song.id)">查看</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </template>
+    </div>
+    <div class="section">
+        <h2>我的歌单</h2>
+        <ul id="my-playlists">
+            <!-- 我的歌单将动态插入到这里 -->
+        </ul>
+    </div>
+    <div class="section">
+        <h2>最近播放</h2>
+        <ul id="recently-played">
+            <!-- 最近播放的歌曲将动态插入到这里 -->
+        </ul>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                type: 1,
+                uploadSong: [],
+                uploadAlbum: [],
+                playlists: [],
+                recentlyPlayed: []
+            }
+        },
+        mounted() {
+            this.fetchUploadSong();
+            this.fetchPlaylists();
+            this.fetchRecentlyPlayed();
+        },
+        methods: {
+            // 时间格式化方法
+            formatTime(row, column, cellValue) {
+                if (!cellValue) return '未知时间';
+                // 处理Java LocalDateTime格式（兼容带毫秒的情况）
+                const dateStr = cellValue.replace('T', ' ').split('.')[0];
+                const date = new Date(dateStr);
+                // 补零函数
+                const pad = n => n.toString().padStart(2, '0');
+                return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}
+                ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+            },
+            fetchUploadSong() {
+                axios.get('/XuJunxi_CloudMusic/song/getSongsByAuthorId')
+                    .then(response => {
+                        this.uploadSong = response.data.songs;
+                    })
+            },
+            fetchPlaylists() {
+                axios.get('/XuJunxi_CloudMusic/playlist/getMyPlaylists')
+                    .then(response => {
+                        this.playlists = response.data;
+                   })
+            },
+            viewSong(songId) {
+                // 页面跳转
+                window.location.href = `song.html?id=${songId}`;
+            }
+        }
+    })
+</script>
 </body>
 </html>
