@@ -92,7 +92,15 @@ public class UserServlet extends BaseServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         String remember = request.getParameter("remember");
-
+        String checkCode = request.getParameter("checkCode");
+        String checkCodeGen = (String) request.getSession().getAttribute("checkCodeGen");
+        JSONObject jsonResponse = new JSONObject();
+        if (!checkCode.equalsIgnoreCase(checkCodeGen)) {
+            jsonResponse.put("success", false);
+            jsonResponse.put("message", "验证码错误");
+            response.getWriter().write(jsonResponse.toJSONString());
+            return;
+        }
         if ("true".equals(remember)) {
             // 如果用户选择了记住密码，将用户信息保存到会话中
             request.getSession().setAttribute("remember", true);
@@ -101,7 +109,7 @@ public class UserServlet extends BaseServlet {
             request.getSession().removeAttribute("remember");
         }
         User user = userService.login(username, password);
-        JSONObject jsonResponse = new JSONObject();
+
         if (user != null) {
             // 将用户信息保存到会话中
             HttpSession session = request.getSession(true);

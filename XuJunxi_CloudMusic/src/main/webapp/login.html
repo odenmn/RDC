@@ -15,8 +15,14 @@
             <br>
             <h1 id="loginMsg">登录</h1>
             <div id="errorMsg"  v-if="errorMessage" style="margin-bottom: -10px">{{ errorMessage }}</div>
-            <p>用户名:<input v-model="username" id="username" name="username" type="text"></p>
+            <p>用户名:<input v-model="username" id="username" name="username" type="text" ></p>
             <p>密码:<input v-model="password" id="password" name="password" type="password"></p>
+            <p class="inputs">
+                验证码:
+                <input v-model="checkCode" name="checkCode" type="text" id="checkCode" required>
+                <img :src="captchaUrl" @click="refreshCaptcha" class="form-img">
+                <a href="#" id="changeImg" @click.prevent="refreshCaptcha">看不清？</a>
+            </p>
             <p>记住我:<input v-model="remember" id="remember" name="remember" type="checkbox"></p>
             <div id="subDiv">
                 <input type="submit" class="button" value="登录">
@@ -35,40 +41,51 @@
                 remember: false,
                 errorMessage: '',
                 usernameMessage: '',
-                isAdmin: ''
+                isAdmin: '',
+                checkCode: '',
+                captchaUrl: '/XuJunxi_CloudMusic/checkCodeServlet'
+
             },
             methods: {
                 login() {
+                    this.checkCode = this.checkCode.trim();
+                    if (this.checkCode === '') {
+                        this.errorMessage = '验证码不能为空';
+                        return;
+                    }
                     axios.post('/XuJunxi_CloudMusic/user/login',  new URLSearchParams({
                         // 使用new URLSearchParams构造请求体参数，将数据格式化为URL编码形式以便传输
                         username: this.username,
                         password: this.password,
-                        remember: this.remember
+                        remember: this.remember,
+                        checkCode: this.checkCode
                     }), {
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded'
                         }
-                    })
-                        .then(response => {
-                            if (response.data.success) {
-                                this.isAdmin = response.data.isAdmin;
-                                if (this.isAdmin === 2){
-                                    // 管理员登录成功，跳转到管理员页面
-                                    window.location.href = 'admin.html';
-                                }
-                                else {
-                                    // 普通用户登录成功，跳转到用户主页
-                                    window.location.href = 'home.html';
-                                }
-                            } else {
-                                // 登录失败，显示错误信息
-                                this.errorMessage = response.data.message;
+                    }).then(response => {
+                        if (response.data.success) {
+                            this.isAdmin = response.data.isAdmin;
+                            if (this.isAdmin === 2){
+                                // 管理员登录成功，跳转到管理员页面
+                                window.location.href = 'admin.html';
                             }
-                        })
-                        .catch(error => {
-                            console.error('登录请求出错:', error);
-                            this.errorMessage = '请求出错，请稍后重试';
-                        });
+                            else {
+                                // 普通用户登录成功，跳转到用户主页
+                                window.location.href = 'home.html';
+                            }
+                        } else {
+                            // 登录失败，显示错误信息
+                            this.errorMessage = response.data.message;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('登录请求出错:', error);
+                        this.errorMessage = '请求出错，请稍后重试';
+                    });
+                },
+                refreshCaptcha() {
+                    this.captchaUrl =  '/XuJunxi_CloudMusic/checkCodeServlet?' + new Date().getMilliseconds();
                 }
             }
         });
