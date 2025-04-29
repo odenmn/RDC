@@ -1,0 +1,105 @@
+ <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>发现</title>
+    <link href="css/home.css" rel="stylesheet">
+</head>
+<body>
+<div id="app" class="container">
+    <div class="header">
+        <h1>搜索</h1>
+    </div>
+    <div class="search-bar">
+        <input type="text" class="search-input" v-model="keyword" id="search-input" placeholder="搜索歌曲、专辑、用户、歌单">
+        <button class="search-button" onclick="search()">搜索</button>
+    </div>
+    <div>
+        <template>
+            <el-table
+                    :data="tableData"
+                    stripe
+                    style="width: 100%">
+                <el-table-column
+                        type="index"
+                        width="50">
+                </el-table-column>
+                <el-table-column
+                        prop="title"
+                        label="歌名"
+                        align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="author"
+                        label="作者"
+                        align="center">
+                </el-table-column>
+                <el-table-column
+                        label="查看"
+                        align="center">
+                    <template slot-scope="scope">
+<!--                        <el-button type="primary" @click="processingReview(scope.row.uploadWorkId,scope.row.id)">处理</el-button>-->
+                    </template>
+                </el-table-column>
+            </el-table>
+        </template>
+        <!--分页工具条-->
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="currentPage"
+                :page-sizes="[5, 10, 15, 20]"
+                :page-size="5"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="500">
+        </el-pagination>
+    </div>
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            keyword: '',
+            currentPage: 1,
+            pageSize: 5,
+            tableData: [],
+            tableCount: '',
+        },
+        methods: {
+            search() {
+                axios.get('/XuJunxi_CloudMusic/song/searchSongsByTitle', new URLSearchParams({
+                    keyword: this.keyword,
+                    currentPage: this.currentPage,
+                    pageSize: this.pageSize
+                }), {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                    .then(response => {
+                        this.tableData = response.data.pageBean.rows;
+                        this.tableCount = response.data.pageBean.totalCount;
+                    })
+                    .catch(error => {
+                        console.error('搜索请求出错:', error);
+                    })
+            },
+            handleSizeChange(val) {
+                // console.log(`每页 ${val} 条`);
+                this.currentPage=val;
+                this.fetchReviews();
+            },
+            handleCurrentChange(val) {
+                // console.log(`当前页: ${val}`);
+                this.currentPage=val;
+                this.fetchReviews();
+            }
+        }
+    })
+</script>
+</body>
+</html>
