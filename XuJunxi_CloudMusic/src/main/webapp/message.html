@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我收到的消息</title>
+    <!-- 引入 Vue 和 Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .message-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .message-item h3 {
+            margin: 0;
+        }
+        .message-item p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <h1>我收到的消息</h1>
+    <div v-if="messages.length === 0">
+        <p>暂无消息</p>
+    </div>
+    <div v-else>
+        <div class="message-item" v-for="message in messages" :key="message.id">
+            <h3>{{ message.title }}</h3>
+            <p>{{ message.content }}</p>
+            <small>时间: {{ message.timestamp }}</small>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            messages: [] // 消息列表
+        },
+        mounted() {
+            // 模拟从后端获取消息数据
+            axios.get('/api/messages') // 假设后端接口路径为 /api/messages
+                .then(response => {
+                    this.messages = response.data;
+                })
+                .catch(error => {
+                    console.error('获取消息失败:', error);
+                });
+        }
+    });
+</script>
+</body>
+</html>
