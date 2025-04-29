@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>审核</title>
+    <link rel="stylesheet" href="css/process.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<div id="app">
+
+    <div>
+        <p v-if="song">歌曲名: {{ song.title }}</p>
+    </div>
+    <audio v-if="song" controls="controls" :src="song.audioUrl"></audio>
+    <div>
+        <p v-if="author && author.username">作者: {{ author.username }}</p>
+        <p v-if="song">点赞数: {{ song.likeCount }}</p>
+    </div>
+    <button @click="addLike">点赞</button>
+    <button @click="removeLike">取消点赞</button>
+    <button @click="addFollow">关注</button>
+    <button @click="removeFollow">取消关注</button>
+    <div>
+        <button @click="">添加到歌单</button>
+        <button @click="downloadSong">下载歌曲</button>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            songId: '',
+            song: null,
+            author: null,
+            message: ''
+        },
+        mounted()
+        {
+            // 获取URL中的id参数
+            const urlParams = new URLSearchParams(window.location.search);
+            this.songId = urlParams.get('id');
+            this.getSongById(this.songId);
+        },
+        methods: {
+            getSongById(id) {
+                axios.post('/XuJunxi_CloudMusic/song/getSongById', new URLSearchParams({
+                    songId : id
+                }),{
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }).then(response => {
+                    this.song = response.data.song;
+                    console.log(this.song.audioUrl);
+                    console.log(this.song);
+                    this.author = response.data.author;
+                })
+            },
+            addLike()
+            {
+                axios.post('/XuJunxi_CloudMusic/like/addLike', new URLSearchParams({
+                    // 使用new URLSearchParams构造请求体参数，将数据格式化为URL编码形式以便传输
+                    songId: this.songId
+                }), {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                    .then(response => {
+                        if (response.data.success) {
+                            alert("点赞成功！");
+                            this.getSongById(this.songId);// 更新点赞数
+                        } else {
+                            alert("点赞失败：" + response.data.message);
+                        }
+                    })
+            },
+            removeLike(){
+                axios.post('/XuJunxi_CloudMusic/like/removeLike', new URLSearchParams({
+                    songId: this.songId
+                }), {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                    .then(response => {
+                        if (response.data.success) {
+                            alert("取消点赞成功！");
+                            this.getSongById(this.songId);// 更新点赞数
+                        }
+                        else {
+                            alert("取消点赞失败：" + response.data.message);
+                        }
+                    })
+            },
+            addFollow()
+            {
+                axios.post('/XuJunxi_CloudMusic/follow/addFollow', new URLSearchParams({
+                    songId: this.songId
+                }), {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                    .then(response => {
+                        if (response.data.success) {
+                            alert("关注成功！");
+                        } else {
+                            alert(response.data.message);
+                        }
+                    })
+            },
+            removeFollow(){
+                axios.post('/XuJunxi_CloudMusic/follow/removeFollow', new URLSearchParams({
+                    songId: this.songId
+                }), {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                    .then(response => {
+                        if (response.data.success) {
+                            alert("取消关注成功！");
+                        }
+                        else {
+                           alert(response.data.message)
+                        }
+                    })
+            },
+            // 下载功能
+            downloadSong() {
+                const link = document.createElement('a');
+                link.href = this.songUrl;
+                link.download = `${this.songTitle}.mp3`; // 自动添加.mp3后缀
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+    });
+</script>
+</body>
+</html>
