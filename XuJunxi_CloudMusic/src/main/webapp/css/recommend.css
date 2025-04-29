@@ -1,0 +1,81 @@
+/* recommend.css */
+
+/* 设置 body 的背景图片 */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    background: url('../img/jay1.jpg') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* 使 #app 容器居中并具有一定的透明背景 */
+
+/* 推荐部分的标题 */
+.recommend-section h2 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* 歌曲项的样式 */
+.song-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.song-item:last-child {
+    border-bottom: none;
+}
+
+.song-info h3 {
+    margin: 0;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.song-info p {
+    margin: 5px 0 0;
+    color: #666;
+}
+
+.view-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.view-button:hover {
+    background-color: #0056b3;
+}
+
+.error {
+    color: red;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* 添加额外的文本样式 */
+.title-text {
+    font-size: 2.5em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.subtitle-text {
+    font-size: 1.2em;
+    color: #666;
+    margin-bottom: 20px;
+}
