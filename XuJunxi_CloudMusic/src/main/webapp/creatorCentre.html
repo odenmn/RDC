@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>创作者中心</title>
+    <link href="css/creatorCentre.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div id="creatorCenter">
+        <div v-if="isMusician === 1">
+            <h1>创作者中心</h1>
+            <div class="tabs">
+                <button @click="activeTab = 'uploadSong'" :class="{ active: activeTab === 'uploadSong' }">上传歌曲</button>
+                <button @click="activeTab = 'uploadAlbum'" :class="{ active: activeTab === 'uploadAlbum' }">上传专辑</button>
+            </div>
+
+            <div v-if="activeTab === 'uploadSong'" class="tab-content">
+                <h2>上传歌曲</h2>
+                <form @submit.prevent="uploadSong">
+                    <input v-model="songTitle" placeholder="歌曲标题" required>
+                    <input v-model="genre" placeholder="歌曲种类" required>
+                    <input v-model="album" placeholder="歌曲所属专辑（可不填）" >
+                    <input type="file" @change="handleSongFileUpload" required>
+                    <button type="submit">上传</button>
+                </form>
+            </div>
+
+            <div v-if="activeTab === 'uploadAlbum'" class="tab-content">
+                <h2>上传专辑</h2>
+                <form @submit.prevent="uploadAlbum">
+                    <input v-model="albumTitle" placeholder="专辑标题" required>
+                    <input type="file" @change="handleAlbumCoverUpload" required>
+                    <button type="submit">上传</button>
+                </form>
+            </div>
+        </div>
+        <div v-else>
+            <h1>创作者中心</h1>
+            <p>您尚未认证为音乐人，请先完成认证。</p>
+            <button @click="becomeMusician">认证为音乐人</button>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#creatorCenter',
+            data: {
+                isMusician: '',
+                activeTab: 'uploadSong',
+                songTitle: '',
+                album: '',
+                genre: '',
+                albumTitle: '',
+                songFile: null,
+                albumCover: null
+            },
+            methods: {
+                // 检查用户是否为音乐人
+                checkMusicianStatus() {
+                    axios.get('/XuJunxi_CloudMusic/musician/checkMusicianStatus')
+                        .then(response => {
+                            this.isMusician = response.data.isMusician;
+                        })
+                        .catch(error => {
+                            console.error('检查音乐人状态失败:', error);
+                        });
+                },
+                // 认证为音乐人
+                becomeMusician() {
+                    window.location.href = 'becomeMusician.html';
+                },
+                // 处理歌曲文件上传
+                handleSongFileUpload(event) {
+                    this.songFile = event.target.files[0];
+                },
+                // 处理专辑封面上传
+                handleAlbumCoverUpload(event) {
+                    this.albumCover = event.target.files[0];
+                },
+                // 上传歌曲
+                uploadSong() {
+                    const formData = new FormData();
+                    formData.append('title', this.songTitle);
+                    formData.append('file', this.songFile);
+                    formData.append('genre', this.genre);
+                    if (!this.album.trim()) {
+                        formData.append('album', null);
+                    } else {
+                        formData.append('album', this.album);
+                    }
+                    axios.post('/XuJunxi_CloudMusic/musician/uploadSong', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    })
+                    .then(response => {
+                        if (response.data.success) {
+                            alert('歌曲上传成功！');
+                            this.songTitle = '';
+                            this.album = '';
+                            this.songFile = null;
+                        } else {
+                            alert('歌曲上传失败：' + response.data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('歌曲上传失败:', error);
+                        alert('歌曲上传失败，请稍后重试。');
+                    });
+                },
+                // 上传专辑
+                uploadAlbum() {
+                    const formData = new FormData();
+                    formData.append('title', this.albumTitle);
+                    formData.append('cover', this.albumCover);
+
+                    axios.post('/XuJunxi_CloudMusic/album/upload', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    })
+                    .then(response => {
+                        if (response.data.success) {
+                            alert('专辑上传成功！');
+                            this.albumTitle = '';
+                            this.albumCover = null;
+                        } else {
+                            alert('专辑上传失败：' + response.data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('专辑上传失败:', error);
+                        alert('专辑上传失败，请稍后重试。');
+                    });
+                }
+            },
+            created() {
+                this.checkMusicianStatus();
+            }
+        });
+    </script>
+</body>
+</html>
