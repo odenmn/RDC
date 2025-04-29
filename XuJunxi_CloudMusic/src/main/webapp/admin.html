@@ -75,7 +75,7 @@
             this.fetchReviews();
         },
         methods: {
-            // 新增时间格式化方法
+            // 时间格式化方法
             formatTime(row, column, cellValue) {
                 if (!cellValue) return '未知时间';
                 // 处理Java LocalDateTime格式（兼容带毫秒的情况）
