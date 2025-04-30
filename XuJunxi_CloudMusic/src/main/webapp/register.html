@@ -113,6 +113,12 @@
                         this.errorMessage = '验证码不能为空';
                         return;
                     }
+                    // 验证密码格式
+                    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{6,20}$/;
+                    if (!passwordRegex.test(this.password)) {
+                        this.errorMessage = '密码必须包含字母和数字，且长度为 6-20';
+                        return;
+                    }
                     axios.post('/XuJunxi_CloudMusic/user/register', new URLSearchParams({
                         username: this.username,
                         password: this.password,
