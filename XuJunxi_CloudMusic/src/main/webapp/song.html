@@ -130,13 +130,18 @@
                         }
                     })
             },
-            // 下载功能
+            // 下载功能，使用浏览器的下载行为
             downloadSong() {
+                // 使用 document.createElement('a') 动态创建一个 HTML 的超链接元素（锚点）
+                // 这个 <a> 标签不会显示在页面上，仅用于触发文件下
                 const link = document.createElement('a');
-                link.href = this.songUrl;
-                link.download = `${this.songTitle}.mp3`; // 自动添加.mp3后缀
+                link.href = this.song.audioUrl;
+                link.download = `${this.song.title}.mp3`; // 自动添加.mp3后缀
+                // 将link元素添加到文档的body部分
                 document.body.appendChild(link);
+                // 触发点击事件
                 link.click();
+                // 移除link元素
                 document.body.removeChild(link);
             }
         }
