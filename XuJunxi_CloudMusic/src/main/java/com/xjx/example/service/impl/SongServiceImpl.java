@@ -39,6 +39,33 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    public boolean addSongsIntoAlbum(int[] songIds, int albumId) {
+        try {
+            for (int songId : songIds) {
+                Song song = songDao.getSongById(songId);
+                song.setAlbumId(albumId);
+                if (!songDao.updateSong(song)) {
+                  return false;
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            logger.warn("更新歌曲失败: ",  e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean removeSongFromAlbum(Song song) {
+        try {
+            song.setAlbumId(0);
+            return songDao.updateSong(song);
+        } catch (Exception e) {
+            logger.warn("更新歌曲失败: {}", song, e);
+            return false;
+        }
+    }
+    @Override
     public boolean approveSongPublic(Song song) {
         try {
             song.setPublic(true);
@@ -85,6 +112,16 @@ public class SongServiceImpl implements SongService {
             return songDao.getSongsByAuthorId(authorId);
         } catch (Exception e) {
             logger.warn("通过作者ID获取歌曲失败: {}", authorId, e);
+            return null;
+        }
+    }
+
+    @Override
+    public List<Song> getNonAlbumSongsByAuthorId(int authorId) {
+        try {
+            return songDao.getNonAlbumSongsByAuthorId(authorId);
+        } catch (Exception e) {
+            logger.warn("通过作者ID获取非专辑歌曲失败: {}", authorId, e);
             return null;
         }
     }

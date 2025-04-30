@@ -110,6 +110,25 @@ public class SongServlet extends BaseServlet{
         response.getWriter().write(jsonResponse.toJSONString());
     }
 
+    public void getNonAlbumSongsByAuthorId(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
+        User user = (User) request.getSession().getAttribute("user");
+        int authorId = user.getId();
+        List<Song> songs = songService.getNonAlbumSongsByAuthorId(authorId);
+        JSONObject jsonResponse = new JSONObject();
+        if (songs == null) {
+            jsonResponse.put("success", false);
+            jsonResponse.put("message", "获取作者歌曲失败");
+            response.getWriter().write(jsonResponse.toJSONString());
+        }
+        jsonResponse.put("success", true);
+        jsonResponse.put("message", "获取作者歌曲成功");
+        jsonResponse.put("songs", songs);
+        response.getWriter().write(jsonResponse.toJSONString());
+    }
+
     // 获取所有歌曲
     public void getAllSongs(HttpServletRequest request, HttpServletResponse response) throws IOException {
         request.setCharacterEncoding("UTF-8");

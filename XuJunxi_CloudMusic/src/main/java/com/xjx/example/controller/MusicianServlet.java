@@ -1,6 +1,8 @@
 package com.xjx.example.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.xjx.example.entity.Album;
 import com.xjx.example.entity.Review;
 import com.xjx.example.entity.Song;
 import com.xjx.example.entity.User;
@@ -21,6 +23,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -92,7 +95,7 @@ public class MusicianServlet extends BaseServlet {
         // 检查请求是否包含 multipart/form-data
         if (!ServletFileUpload.isMultipartContent(request)) {
             // 如果请求不是 multipart/form-data，则返回错误信息
-            response.setContentType("application/json");
+            response.setContentType("application/json;charset=UTF-8");
             response.setCharacterEncoding("UTF-8");
             PrintWriter out = response.getWriter();
             out.print("{\"success\": false, \"message\": \"请求不是 multipart/form-data\"}");
@@ -201,5 +204,61 @@ public class MusicianServlet extends BaseServlet {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    public void addSongIntoAlbum(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
+        JSONObject jsonResponse = new JSONObject();
+        BufferedReader reader = request.getReader();
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line);
+        }
+        JSONObject json = JSONObject.parseObject(sb.toString());
+        System.out.println("json:"+json);
+        int[] songIds = json.getJSONArray("songIds").toJavaObject(int[].class);
+        int albumId = json.getInteger("albumId");
+//        int[] songIds = JSON.parseObject(request.getParameter("songIds"), int[].class);
+//        int albumId = Integer.parseInt(request.getParameter("albumId"));
+        boolean isAdded = songService.addSongsIntoAlbum(songIds, albumId);
+        System.out.println("isAdded:"+isAdded);
+        if (isAdded) {
+            jsonResponse.put("success", true);
+            jsonResponse.put("message", "歌曲添加成功");
+            response.getWriter().write(jsonResponse.toJSONString());
+        } else {
+            jsonResponse.put("success", false);
+            jsonResponse.put("message", "歌曲添加失败");
+            response.getWriter().write(jsonResponse.toJSONString());
+        }
+    }
+    public void uploadAlbum(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
+        User user = (User) request.getSession().getAttribute("user");
+        String albumTitle = request.getParameter("albumTitle");
+        System.out.println("albumTitle:"+albumTitle);
+        String albumCoverUrl = request.getParameter("albumCoverUrl");
+        Album album = new Album();
+        album.setTitle(albumTitle);
+        album.setAuthorId(user.getId());
+        album.setCoverUrl(albumCoverUrl);
+        Integer albumId = albumService.addAlbum(album);
+        JSONObject jsonResponse = new JSONObject();
+        if (albumId != 0){
+            jsonResponse.put("success", true);
+            jsonResponse.put("message", "专辑《" + albumTitle + "》上传成功");
+            jsonResponse.put("albumId", albumId);
+            response.getWriter().write(jsonResponse.toJSONString());
+        } else {
+            jsonResponse.put("success", false);
+            jsonResponse.put("message", "专辑《" + albumTitle + "》上传失败");
+            response.getWriter().write(jsonResponse.toJSONString());
+        }
+
     }
 }

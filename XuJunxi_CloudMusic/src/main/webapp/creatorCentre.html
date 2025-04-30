@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <title>创作者中心</title>
     <link href="css/creatorCentre.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
     <div id="creatorCenter">
@@ -31,9 +29,44 @@
                 <h2>上传专辑</h2>
                 <form @submit.prevent="uploadAlbum">
                     <input v-model="albumTitle" placeholder="专辑标题" required>
-                    <input type="file" @change="handleAlbumCoverUpload" required>
                     <button type="submit">上传</button>
                 </form>
+                <div>
+                    <template>
+                        <el-table
+                                :data="uploadSong"
+                                stripe
+                                style="width: 100%"
+                                @selection-change="handleSelectionChange">
+                            <el-table-column
+                                    type="selection"
+                                    width="55">
+                            </el-table-column>
+                            <el-table-column
+                                    type="index"
+                                    width="50">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="uploadTime"
+                                    label="日期"
+                                    align="center"
+                                    :formatter="formatTime">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="title"
+                                    label="歌名"
+                                    align="center">
+                            </el-table-column>
+<!--                            <el-table-column-->
+<!--                                    label="查看"-->
+<!--                                    align="center">-->
+<!--                                <template slot-scope="scope">-->
+<!--                                    <el-button type="primary" @click="viewSong(scope.row.id)">查看</el-button>-->
+<!--                                </template>-->
+<!--                            </el-table-column>-->
+                        </el-table>
+                    </template>
+                </div>
             </div>
         </div>
         <div v-else>
@@ -42,21 +75,48 @@
             <button @click="becomeMusician">认证为音乐人</button>
         </div>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
     <script>
         new Vue({
             el: '#creatorCenter',
             data: {
                 isMusician: '',
                 activeTab: 'uploadSong',
+                uploadSong: [],
                 songTitle: '',
                 album: '',
+                albumId: '',
                 genre: '',
                 albumTitle: '',
                 songFile: null,
-                albumCover: null
+                albumCover: null,
+                selectedIds: [],
+                multipleSelection: [],
+            },
+            mounted() {
+                this.fetchNonAlbumUploadSong();
             },
             methods: {
+                // 时间格式化方法
+                formatTime(row, column, cellValue) {
+                    if (!cellValue) return '未知时间';
+                    // 处理Java LocalDateTime格式（兼容带毫秒的情况）
+                    const dateStr = cellValue.replace('T', ' ').split('.')[0];
+                    const date = new Date(dateStr);
+                    // 补零函数
+                    const pad = n => n.toString().padStart(2, '0');
+                    return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}
+                ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+                },
+                fetchNonAlbumUploadSong() {
+                    axios.get('/XuJunxi_CloudMusic/song/getNonAlbumSongsByAuthorId')
+                        .then(response => {
+                            this.uploadSong = response.data.songs;
+                        })
+                },
                 // 检查用户是否为音乐人
                 checkMusicianStatus() {
                     axios.get('/XuJunxi_CloudMusic/musician/checkMusicianStatus')
@@ -112,33 +172,65 @@
                 },
                 // 上传专辑
                 uploadAlbum() {
-                    const formData = new FormData();
-                    formData.append('title', this.albumTitle);
-                    formData.append('cover', this.albumCover);
-
-                    axios.post('/XuJunxi_CloudMusic/album/upload', formData, {
+                    if (!this.albumTitle.trim()){
+                        alert('专辑标题不能为空！');
+                        return;
+                    }
+                    if(this.multipleSelection.length === 0) {
+                        alert('专辑不能为空！请选择要上传的歌曲。');
+                        return;
+                    }
+                    for (let i = 0; i < this.multipleSelection.length; i++) {
+                        let selectedSong = this.multipleSelection[i];
+                        this.selectedIds[i] = selectedSong.id;
+                    }
+                    console.log(this.selectedIds);
+                    axios.post('/XuJunxi_CloudMusic/musician/uploadAlbum', new URLSearchParams({
+                        albumTitle: this.albumTitle,
+                        songIds: this.selectedIds,
+                        albumCover: this.albumCover
+                    }), {
                         headers: {
-                            'Content-Type': 'multipart/form-data'
+                            'Content-Type': 'application/x-www-form-urlencoded'
                         }
                     })
-                    .then(response => {
+                        .then(response => {
                         if (response.data.success) {
-                            alert('专辑上传成功！');
-                            this.albumTitle = '';
-                            this.albumCover = null;
+                            this.albumId = response.data.albumId;
+                            axios.post('/XuJunxi_CloudMusic/musician/addSongIntoAlbum', {
+                                albumId: this.albumId,
+                                songIds: this.selectedIds,
+                            }).then(response => {
+                                if (response.data.success) {
+                                    alert('专辑上传成功！');
+                                    // 刷新页面
+                                    location.reload();
+                                } else {
+                                    alert('专辑上传失败：' + response.data.message);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('专辑上传失败:', error);
+                                alert('专辑上传失败，请稍后重试。');
+                            })
                         } else {
-                            alert('专辑上传失败：' + response.data.message);
+                            alert('专辑创建失败：' + response.data.message);
                         }
                     })
                     .catch(error => {
-                        console.error('专辑上传失败:', error);
-                        alert('专辑上传失败，请稍后重试。');
+                        console.error('专辑创建失败:', error);
+                        alert('专辑创建失败，请稍后重试。');
                     });
+                },
+                handleSelectionChange(val) {
+                    this.multipleSelection = val;
+                    console.log(this.multipleSelection);
                 }
             },
             created() {
                 this.checkMusicianStatus();
-            }
+            },
+
         });
     </script>
 </body>
