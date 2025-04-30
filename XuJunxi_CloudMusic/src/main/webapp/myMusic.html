@@ -57,12 +57,13 @@
                         width="50">
                 </el-table-column>
                 <el-table-column
-                        prop="uploadTime"
+                        prop="createdAt"
                         label="日期"
-                        align="center">
+                        align="center"
+                        :formatter="formatTime">
                 </el-table-column>
                 <el-table-column
-                        prop="content"
+                        prop="title"
                         label="专辑名"
                         align="center">
                 </el-table-column>
@@ -82,12 +83,6 @@
             <!-- 我的歌单将动态插入到这里 -->
         </ul>
     </div>
-    <div class="section">
-        <h2>最近播放</h2>
-        <ul id="recently-played">
-            <!-- 最近播放的歌曲将动态插入到这里 -->
-        </ul>
-    </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -102,13 +97,12 @@
                 uploadSong: [],
                 uploadAlbum: [],
                 playlists: [],
-                recentlyPlayed: []
             }
         },
         mounted() {
             this.fetchUploadSong();
+            this.fetchUploadAlbum();
             this.fetchPlaylists();
-            this.fetchRecentlyPlayed();
         },
         methods: {
             // 时间格式化方法
@@ -126,6 +120,12 @@
                 axios.get('/XuJunxi_CloudMusic/song/getSongsByAuthorId')
                     .then(response => {
                         this.uploadSong = response.data.songs;
+                    })
+            },
+            fetchUploadAlbum() {
+                axios.get('/XuJunxi_CloudMusic/album/getAlbumsByAuthorId')
+                    .then(response => {
+                        this.uploadAlbum = response.data.albums;
                     })
             },
             fetchPlaylists() {

@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface AlbumDao {
     // 添加专辑
-    boolean addAlbum(Album album) throws SQLException;
+    Integer addAlbum(Album album) throws SQLException;
 
     // 删除专辑
     boolean deleteAlbum(int id) throws SQLException;
@@ -28,4 +28,6 @@ public interface AlbumDao {
     List<Album> searchAlbumsByTitle(String keyword) throws SQLException;
 
     List<Album> selectByPage(int begin, int pageSize) throws SQLException;
+
+    List<Album> getAlbumByAuthorId(int authorId) throws SQLException;
 }

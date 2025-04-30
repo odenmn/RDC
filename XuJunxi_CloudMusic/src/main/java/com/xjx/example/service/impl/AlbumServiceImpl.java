@@ -14,12 +14,12 @@ public class AlbumServiceImpl implements AlbumService {
     private final AlbumDao albumDao = new AlbumDaoImpl();
 
     @Override
-    public boolean addAlbum(Album album) {
+    public Integer addAlbum(Album album) {
         try {
             return albumDao.addAlbum(album);
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
     }
 
@@ -54,6 +54,16 @@ public class AlbumServiceImpl implements AlbumService {
     }
 
     @Override
+    public List<Album> getAlbumByAuthorId(int authorId) {
+        try {
+            return albumDao.getAlbumByAuthorId(authorId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
     public Album getAlbumByTitle(String title) {
         try {
             return albumDao.getAlbumByTitle(title);
@@ -69,7 +79,7 @@ public class AlbumServiceImpl implements AlbumService {
             return albumDao.getAllAlbums();
         } catch (SQLException e) {
             e.printStackTrace();
-            return new ArrayList<>();
+            return null;
         }
     }
 
@@ -79,7 +89,7 @@ public class AlbumServiceImpl implements AlbumService {
             return albumDao.searchAlbumsByTitle(keyword);
         } catch (SQLException e) {
             e.printStackTrace();
-            return new ArrayList<>();
+            return null;
         }
     }
 }
