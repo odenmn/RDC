@@ -2,11 +2,14 @@ package com.xjx.example.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.xjx.example.entity.Album;
 import com.xjx.example.entity.PageBean;
 import com.xjx.example.entity.Review;
 import com.xjx.example.entity.Song;
+import com.xjx.example.service.AlbumService;
 import com.xjx.example.service.ReviewService;
 import com.xjx.example.service.SongService;
+import com.xjx.example.service.impl.AlbumServiceImpl;
 import com.xjx.example.service.impl.ReviewServiceImpl;
 import com.xjx.example.service.impl.SongServiceImpl;
 
@@ -21,6 +24,7 @@ public class AdminServlet extends BaseServlet {
 
     private final ReviewService reviewService = new ReviewServiceImpl();
     private final SongService songService = new SongServiceImpl();
+    private final AlbumService albumService = new AlbumServiceImpl();
     private Integer getReviewIdFromRequest(HttpServletRequest req) {
         String reviewIdStr = req.getParameter("reviewId");
         if (reviewIdStr == null || reviewIdStr.isEmpty()) {
@@ -105,7 +109,6 @@ public class AdminServlet extends BaseServlet {
         resp.getWriter().write(json.toJSONString());
     }
     public void approveReview(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        System.out.println("111");
         resp.setContentType("application/json;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
         Integer reviewId = getReviewIdFromRequest(req);
@@ -120,13 +123,29 @@ public class AdminServlet extends BaseServlet {
         System.out.println(review.getContent());
         if ("歌曲".equals(review.getContent())){
             Song song = songService.getSongById(review.getUploadWorkId());
-            boolean result1 = reviewService.approveReview(reviewId);
-            boolean result2 = songService.approveSongPublic(song);
-            System.out.println("result1: " + result1);
-            System.out.println("result2: " + result2);
-//            success = reviewService.approveReview(reviewId) && songService.approveSongPublic(song);
-            success = result1 && result2;
+            success = reviewService.approveReview(reviewId) && songService.approveSongPublic(song);
             if (success) {
+                json = setSuccessResponse("审核通过成功");
+                resp.getWriter().write(json.toJSONString());
+            } else {
+                json = setErrorResponse("审核通过失败");
+                resp.getWriter().write(json.toJSONString());
+            }
+        }
+        else {
+            // 设置专辑内歌曲的公开状态
+            List<Song> songs = songService.getSongsByAlbumId(review.getUploadWorkId());
+            for (Song song : songs) {
+                boolean result = songService.approveSongPublic(song);
+                if (!result){
+                    json = setErrorResponse("审核通过失败");
+                    resp.getWriter().write(json.toJSONString());
+                    return;
+                }
+            }
+            // 设置专辑的公开状态
+            Album album = albumService.getAlbumById(review.getUploadWorkId());
+            if (reviewService.approveReview(reviewId) && albumService.approveAlbumPublic(album)) {
                 json = setSuccessResponse("审核通过成功");
                 resp.getWriter().write(json.toJSONString());
             } else {
@@ -157,6 +176,9 @@ public class AdminServlet extends BaseServlet {
                 json= setErrorResponse("审核拒绝失败");
                 resp.getWriter().write(json.toJSONString());
             }
+        } else {
+            json = setSuccessResponse("审核拒绝成功");
+            resp.getWriter().write(json.toJSONString());
         }
     }
 

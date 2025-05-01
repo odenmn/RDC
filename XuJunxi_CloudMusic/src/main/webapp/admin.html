@@ -37,7 +37,7 @@
                         label="操作"
                         align="center">
                     <template slot-scope="scope">
-                        <el-button type="primary" @click="processingReview(scope.row.uploadWorkId,scope.row.id)">处理</el-button>
+                        <el-button type="primary" @click="processingReview(scope.row.uploadWorkId,scope.row.id,scope.row.content)">处理</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -96,27 +96,45 @@
                         console.error('获取待审核歌曲失败:', error);
                     });
             },
-            processingReview(uploadWorkId, id) {
-                console.log("要处理的歌曲ID:"+uploadWorkId);
-                axios.post('/XuJunxi_CloudMusic/admin/processingReview', new URLSearchParams({
-                    reviewId: id
-                }), {
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    }
-                })
-                    .then(response => {
-                        if (response.data.success) {
-                            this.fetchReviews(); // 刷新待审核记录
-                            // 跳转到处理页面
-                            window.location.href = `process.html?uploadWorkId=${uploadWorkId}&reviewId=${id}`;
-                        } else {
-                            console.error('处理审核失败:', response.data.message);
+            processingReview(uploadWorkId, id, content) {
+                if (content === '歌曲') {
+                    console.log("要处理的歌曲ID:"+uploadWorkId);
+                    axios.post('/XuJunxi_CloudMusic/admin/processingReview', new URLSearchParams({
+                        reviewId: id
+                    }), {
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
                         }
                     })
-                    .catch(error => {
-                        console.error('处理审核失败:', error);
-                    });
+                        .then(response => {
+                            if (response.data.success) {
+                                this.fetchReviews(); // 刷新待审核记录
+                                // 跳转到处理页面
+                                window.location.href = `processSong.html?uploadWorkId=${uploadWorkId}&reviewId=${id}`;
+                            } else {
+                                console.error('处理审核失败:', response.data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('处理审核失败:', error);
+                        });
+                } else {
+                    console.log("要处理的专辑ID:"+uploadWorkId);
+                    axios.post('/XuJunxi_CloudMusic/admin/processingReview', new URLSearchParams({
+                        reviewId: id
+                    }), {
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    })
+                        .then(response => {
+                            if (response.data.success) {
+                                this.fetchReviews(); // 刷新待审核记录
+                                // 跳转到处理页面
+                                window.location.href = `processAlbum.html?albumId=${uploadWorkId}&reviewId=${id}`;
+                            }
+                        })
+                }
             },
             approveSong(id) {
                 axios.post('/admin/approveSong', { reviewId: id })
