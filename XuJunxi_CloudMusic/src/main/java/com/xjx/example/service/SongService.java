@@ -20,4 +20,6 @@ public interface SongService {
     List<Song> getRandomRecommendations(int count);
 
     List<Song> getSongsByAlbumId(int albumId);
+
+    boolean increasePlayCount(int songId);
 }

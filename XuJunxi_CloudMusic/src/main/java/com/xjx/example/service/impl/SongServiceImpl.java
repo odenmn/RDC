@@ -168,5 +168,16 @@ public class SongServiceImpl implements SongService {
         }
     }
 
+    @Override
+    public boolean increasePlayCount(int songId) {
+        try {
+            Song song = songDao.getSongById(songId);
+            song.setPlayCount(song.getPlayCount() + 1);
+            return songDao.updateSong(song);
+        } catch (Exception e) {
+            logger.warn("更新歌曲播放次数失败: {}", songId, e);
+            return false;
+        }
+    }
 
 }

@@ -35,15 +35,24 @@
             songId: '',
             song: null,
             author: null,
-            message: ''
+            message: '',
+            hasIncreasedPlayCount: false // 添加一个标志，用于记录是否已经增加播放数
+        },
+        watch: {
+            song(newSong) {
+                if (newSong) {
+                    this.$nextTick(() => {
+                        this.setupAudioEvent(this.songId); // 确保 DOM 已更新
+                    });
+                }
+            }
         },
         mounted()
         {
             // 获取URL中的id参数
             const urlParams = new URLSearchParams(window.location.search);
             this.songId = urlParams.get('id');
-            this.getSongById(this.songId);
-        },
+            this.getSongById(this.songId);},
         methods: {
             getSongById(id) {
                 axios.post('/XuJunxi_CloudMusic/song/getSongById', new URLSearchParams({
@@ -58,6 +67,41 @@
                     console.log(this.song);
                     this.author = response.data.author;
                 })
+            },
+            setupAudioEvent(songId) {
+                // 获取页面上的音频元素
+                const audioElement = document.querySelector('audio');
+                // 检查音频元素是否存在
+                if (audioElement) {
+                    // 当音频开始播放时，添加事件监听器
+                    audioElement.addEventListener('play', () => {
+                        // 当用户点击播放按钮或自动播放开始时，调用 increasePlayCount
+                        this.increasePlayCount(songId);
+                    });
+                }
+                console.log(audioElement);
+            },
+            increasePlayCount(songId) {
+                if (this.hasIncreasedPlayCount) {
+                    // 播放量已增加，不再重复请求
+                    return;
+                }
+                axios.post('/XuJunxi_CloudMusic/song/increasePlayCount', new URLSearchParams({
+                    songId: songId
+                }), {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }).then(response => {
+                    if (response.data.success) {
+                        console.log(response.data.message);
+                        this.hasIncreasedPlayCount = true; // 标记为播放量已增加
+                    } else {
+                        console.error(response.data.message);
+                    }
+                }).catch(error => {
+                    console.error("请求播放量接口出错:", error);
+                });
             },
             addLike()
             {

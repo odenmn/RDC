@@ -195,4 +195,21 @@ public class SongServlet extends BaseServlet{
             response.getWriter().write(jsonResponse.toJSONString());
         }
     }
+
+    public void increasePlayCount(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
+        int songId = Integer.parseInt(request.getParameter("songId"));
+        boolean result = songService.increasePlayCount(songId);
+        JSONObject jsonResponse = new JSONObject();
+        if (result) {
+            jsonResponse.put("success", true);
+            jsonResponse.put("message", "播放次数增加成功");
+        } else {
+            jsonResponse.put("success", false);
+            jsonResponse.put("message", "播放次数增加失败");
+        }
+        response.getWriter().write(jsonResponse.toJSONString());
+    }
 }
