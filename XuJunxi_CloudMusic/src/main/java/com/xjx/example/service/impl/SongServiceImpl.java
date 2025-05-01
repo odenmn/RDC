@@ -125,17 +125,6 @@ public class SongServiceImpl implements SongService {
             return null;
         }
     }
-
-    @Override
-    public List<Song> getAllSongs() {
-        try {
-            return songDao.getAllSongs();
-        } catch (Exception e) {
-            logger.error("获取所有歌曲失败", e);
-            return null;
-        }
-    }
-
     @Override
     public PageBean<Song> searchSongsByTitle(String keyword, int currentPage, int pageSize) {
         try {
@@ -160,11 +149,21 @@ public class SongServiceImpl implements SongService {
     @Override
     public List<Song> getRandomRecommendations(int count) {
         try {
-            List<Song> allSongs = songDao.getAllSongs();
+            List<Song> allSongs = songDao.getAllSongsPublic();
             Collections.shuffle(allSongs); // 打乱顺序
             return allSongs.subList(0, Math.min(count, allSongs.size()));
         } catch (Exception e) {
             logger.error("获取随机推荐失败", e);
+            return null;
+        }
+    }
+
+    @Override
+    public List<Song> getSongsByAlbumId(int albumId) {
+        try {
+            return songDao.getSongsByAlbumId(albumId);
+        } catch (Exception e) {
+            logger.warn("通过专辑ID获取歌曲失败: {}", albumId, e);
             return null;
         }
     }

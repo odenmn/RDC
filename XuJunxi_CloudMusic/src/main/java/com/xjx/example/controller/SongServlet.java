@@ -110,6 +110,29 @@ public class SongServlet extends BaseServlet{
         response.getWriter().write(jsonResponse.toJSONString());
     }
 
+    public void getSongsByAlbumId(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
+        BufferedReader reader = request.getReader();
+        String line = reader.readLine();
+        JSONObject json = JSONObject.parseObject(line);
+        int albumId = json.getInteger("albumId");
+        List<Song> songs = songService.getSongsByAlbumId(albumId);
+        JSONObject jsonResponse = new JSONObject();
+        if (songs == null) {
+            jsonResponse.put("success", false);
+            jsonResponse.put("message", "获取专辑歌曲失败");
+            response.getWriter().write(jsonResponse.toJSONString());
+            return;
+        }
+        jsonResponse.put("success", true);
+        jsonResponse.put("message", "获取专辑歌曲成功");
+        jsonResponse.put("songs", songs);
+        response.getWriter().write(jsonResponse.toJSONString());
+    }
+
+    // 获取作者非专辑歌曲
     public void getNonAlbumSongsByAuthorId(HttpServletRequest request, HttpServletResponse response) throws IOException {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
@@ -125,20 +148,6 @@ public class SongServlet extends BaseServlet{
         }
         jsonResponse.put("success", true);
         jsonResponse.put("message", "获取作者歌曲成功");
-        jsonResponse.put("songs", songs);
-        response.getWriter().write(jsonResponse.toJSONString());
-    }
-
-    // 获取所有歌曲
-    public void getAllSongs(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json;charset=UTF-8");
-
-        List<Song> songs = songService.getAllSongs();
-        JSONObject jsonResponse = new JSONObject();
-        jsonResponse.put("success", true);
-        jsonResponse.put("message", "获取所有歌曲成功");
         jsonResponse.put("songs", songs);
         response.getWriter().write(jsonResponse.toJSONString());
     }
@@ -167,12 +176,12 @@ public class SongServlet extends BaseServlet{
 
         try {
             int count = 5;// 获取5首随机推荐
-            List<Song> recommendations = songService.getRandomRecommendations(count);
+            List<Song> songs = songService.getRandomRecommendations(count);
 
             JSONObject jsonResponse = new JSONObject();
-            if (recommendations != null) {
+            if (songs != null) {
                 jsonResponse.put("success", true);
-                jsonResponse.put("recommendations", recommendations);
+                jsonResponse.put("songs", songs);
             } else {
                 jsonResponse.put("success", false);
                 jsonResponse.put("message", "获取推荐失败");

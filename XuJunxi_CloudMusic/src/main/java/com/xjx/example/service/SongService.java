@@ -16,7 +16,8 @@ public interface SongService {
     Song getSongById(int id);
     List<Song> getSongsByAuthorId(int authorId);
     List<Song> getNonAlbumSongsByAuthorId(int authorId);
-    List<Song> getAllSongs();
     PageBean<Song> searchSongsByTitle(String keyword, int currentPage, int pageSize);
     List<Song> getRandomRecommendations(int count);
+
+    List<Song> getSongsByAlbumId(int albumId);
 }

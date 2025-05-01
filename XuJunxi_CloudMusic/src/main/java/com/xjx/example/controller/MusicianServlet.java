@@ -109,7 +109,6 @@ public class MusicianServlet extends BaseServlet {
         factory.setSizeThreshold(MEMORY_THRESHOLD);
         // 设置临时目录
         factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
-
         ServletFileUpload upload = new ServletFileUpload(factory);
         // 设置单个文件最大大小
         upload.setFileSizeMax(MAX_FILE_SIZE);
@@ -130,31 +129,73 @@ public class MusicianServlet extends BaseServlet {
                 String album = null;
                 // 遍历表单项
                 for (FileItem item : formItems) {
-                    if (!item.isFormField()) {
-                        // 如果是文件项，则赋值给 fileItem
-                        fileItem = item;
-                    } else  {
-                        // 如果是表单字段，则根据字段名赋值
-                        String fieldName = item.getFieldName();
-                        if ("title".equals(fieldName)) {
-                            songTitle = item.getString("UTF-8");
-                            System.out.println("title:" + songTitle);
-                        } else if ("genre".equals(fieldName)) {
-                            genre = item.getString("UTF-8");
-                            System.out.println("genre:" + genre);
-                        } else if ("album".equals(fieldName)) {
-                            album = item.getString("UTF-8");
-                            System.out.println("album:" + album);
+                    // 判断是否为表单项
+                    if (item.isFormField()) {
+                        switch (item.getFieldName()) {
+                            case "title": songTitle = item.getString("UTF-8"); break;
+                            case "genre": genre = item.getString("UTF-8"); break;
+                            case "album": album = item.getString("UTF-8"); break;
                         }
+                    } else {
+                        // 如果是文件项，则保存文件
+                        fileItem = item;
                     }
                 }
 
                 // 检查文件项和标题是否都存在
                 if (fileItem != null && songTitle != null) {
-                    // 获取文件名
-                    String fileName = new File(fileItem.getName()).getName();
+                    // 获取真实路径
+                    String uploadPath = getServletContext().getRealPath("/audio");
+                    File uploadDir = new File(uploadPath);
+
+                    // 如果目录不存在，则创建
+                    if (!uploadDir.exists()) {
+                        boolean created = uploadDir.mkdirs(); // 创建多级目录
+                        if (!created) {
+                            System.err.println("无法创建上传目录：" + uploadDir.getAbsolutePath());
+                            jsonResponse.put("success", false);
+                            jsonResponse.put("message", "无法创建上传目录");
+                            response.getWriter().write(jsonResponse.toJSONString());
+                            return;
+                        }
+                    }
+
+                    // 获取原始文件名
+                    String fileName = fileItem.getName();
+                    if (fileName == null || fileName.isEmpty()) {
+                        System.err.println("文件名为空");
+                        jsonResponse.put("success", false);
+                        jsonResponse.put("message", "文件名为空");
+                        response.getWriter().write(jsonResponse.toJSONString());
+                        return;
+                    }
+
+                    // 提取文件扩展名
+                    String fileExt = "";
+                    int dotIndex = fileName.lastIndexOf(".");
+                    if (dotIndex > 0) {
+                        fileExt = fileName.substring(dotIndex);
+                    }
+
+                    // 使用 UUID 避免重复文件名
+                    String uniqueFileName = System.currentTimeMillis() + "_" + (int)(Math.random() * 10000) + fileExt;
+
+                    // 构建目标文件对象
+                    File storeFile = new File(uploadDir, uniqueFileName);
+
+                    // 写入磁盘
+                    try {
+                        fileItem.write(storeFile); // 注意：这个方法会自动关闭流
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        jsonResponse.put("success", false);
+                        jsonResponse.put("message", "文件写入失败：" + e.getMessage());
+                        response.getWriter().write(jsonResponse.toJSONString());
+                        return;
+                    }
+
                     // 构建文件的 URL
-                    String audioUrl = "/XuJunxi_CloudMusic/audio/" + fileName;
+                    String audioUrl = "/XuJunxi_CloudMusic/audio/" + uniqueFileName;
                     System.out.println("audioUrl:"+audioUrl);
                     User user = (User) request.getSession().getAttribute("user");
                     // 设置响应的字符编码和内容类型
@@ -250,6 +291,15 @@ public class MusicianServlet extends BaseServlet {
         Integer albumId = albumService.addAlbum(album);
         JSONObject jsonResponse = new JSONObject();
         if (albumId != 0){
+            // 设置审核
+            Review review = new Review();
+            review.setUserId(user.getId());
+            review.setUploadWorkId(albumId);
+            review.setContent("专辑");
+            System.out.println("提交审核");
+            System.out.println("id:"+review.getUploadWorkId());
+            // 提交审核
+            reviewService.submitReview(review);
             jsonResponse.put("success", true);
             jsonResponse.put("message", "专辑《" + albumTitle + "》上传成功");
             jsonResponse.put("albumId", albumId);

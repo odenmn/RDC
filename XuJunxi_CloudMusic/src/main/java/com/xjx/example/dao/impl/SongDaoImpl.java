@@ -96,7 +96,7 @@ public class SongDaoImpl implements SongDao {
     }
 
     @Override
-    public List<Song> getAllSongs() {
+    public List<Song> getAllSongsPublic() {
         String sql = "SELECT * FROM song WHERE is_public = true";
         List<Song> songs = new ArrayList<>();
         try (Connection connection = JDBCUtil.getConnection();
@@ -155,6 +155,22 @@ public class SongDaoImpl implements SongDao {
         }
         return 0;
     }
+
+    @Override
+    public List<Song> getSongsByAlbumId(int albumId) {
+        String sql = "SELECT * FROM song WHERE album_id = ?";
+        List<Song> songs = new ArrayList<>();
+        try (Connection connection = JDBCUtil.getConnection();
+             ResultSet rs = JDBCUtil.executeQuery(connection, sql, albumId)) {
+            while (rs.next()) {
+                songs.add(mapResultSetToSong(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return songs;
+    }
+
     // 将ResultSet映射为Song对象
     private Song mapResultSetToSong(ResultSet rs) throws SQLException {
         Song song = new Song();
