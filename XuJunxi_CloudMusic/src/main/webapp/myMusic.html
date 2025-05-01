@@ -58,7 +58,7 @@
                 </el-table-column>
                 <el-table-column
                         prop="createdAt"
-                        label="日期"
+                        label="上传日期"
                         align="center"
                         :formatter="formatTime">
                 </el-table-column>
@@ -71,7 +71,7 @@
                         label="查看"
                         align="center">
                     <template slot-scope="scope">
-                        <el-button type="primary" @click="viewSong(song.id)">查看</el-button>
+                        <el-button type="primary" @click="viewAlbum(scope.row.id)">查看</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -137,6 +137,10 @@
             viewSong(songId) {
                 // 页面跳转
                 window.location.href = `song.html?id=${songId}`;
+            },
+            viewAlbum(albumId) {
+                // 页面跳转
+                window.location.href = `album.html?albumId=${albumId}`;
             }
         }
     })
