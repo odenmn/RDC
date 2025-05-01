@@ -10,28 +10,34 @@
         <div class="header">
             <h1>音乐广场</h1>
         </div>
-<!--        <div class="search-bar">-->
-<!--            <input type="text" class="search-input" id="search-input" placeholder="搜索歌曲、专辑、用户、歌单">-->
-<!--            <button class="search-button" onclick="search()">搜索</button>-->
-<!--        </div>-->
-<!--        <div id="search-results">-->
-<!--            &lt;!&ndash; 搜索结果将动态插入到这里 &ndash;&gt;-->
-<!--        </div>-->
         <div>
             <a href="search.html">搜索</a>
         </div>
         <div class="recommend-section">
             <h2>每日推荐</h2>
+            <div class="tab-buttons">
+                <button :class="{ active: type===1 }" @click="type=1">歌曲</button>
+                <button :class="{ active: type===2 }" @click="type=2">专辑</button>
+            </div>
             <div v-if="loading">加载中...</div>
-            <div v-else>
-                <div v-for="song in recommendations" :key="song.id" class="song-item">
+            <div v-else-if="type===1">
+                <div v-for="song in songs" :key="song.id" class="song-item" style="color: white">
                     <div class="song-info">
                         <h3>歌曲：{{ song.title }}</h3>
-                        <p>歌手：{{ getAuthorName(song.authorId) }}</p>
+                        <p>歌手：{{ getSongAuthorName(song.authorId) }}</p>
                         <button class="view-button" @click="viewSong(song.id)">查看</button>
                     </div>
                 </div>
                 <div v-if="error" class="error">{{ error }}</div>
+            </div>
+            <div v-else-if="type===2">
+                <div v-for="album in albums" :key="album.id" class="album-item" style="color: white">
+                    <div class="album-info">
+                        <h3>专辑：{{ album.title }}</h3>
+                        <p>歌手：{{ getAlbumAuthorName(album.authorId) }}</p>
+                        <button class="view-button" @click="viewAlbum(album.id)">查看</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -41,8 +47,11 @@
     new Vue({
         el: '#app',
         data: {
-            recommendations: [],
-            authors: new Map(), // 存储作者信息
+            type: 1,
+            songs: [],
+            albums : [],
+            songAuthors: new Map(), // 存储歌曲作者信息
+            albumAuthors: new Map(),// 存储专辑作者信息
             loading: false,
             error: '',
         },
@@ -53,13 +62,22 @@
             async fetchRandomRecommendations() {
                 this.loading = true;
                 try {
-                    const response = await axios.get('/XuJunxi_CloudMusic/song/getRandomRecommendations');
-                    if (response.data.success) {
-                        this.recommendations = response.data.recommendations;
-                        // 批量获取作者信息
+                    const songResponse = await axios.get('/XuJunxi_CloudMusic/song/getRandomRecommendations');
+                    if (songResponse.data.success) {
+                        this.songs = songResponse.data.songs;
+                        // 批量获取歌曲作者信息
                         await this.loadAuthors();
                     } else {
-                        this.error = '获取推荐失败：' + (response.data.message || '未知错误');
+                        this.error = '获取推荐歌曲失败：' + (response.data.message || '未知错误');
+                    }
+
+                    const albumResponse = await axios.get('/XuJunxi_CloudMusic/album/getRandomRecommendations');
+                    if (albumResponse.data.success) {
+                        this.albums = albumResponse.data.albums;
+                        // 批量获取专辑作者信息
+                        await this.loadAuthors();
+                    } else {
+                        this.error = '获取推荐专辑失败：' + (response.data.message || '未知错误');
                     }
                 } catch (err) {
                     console.error('请求失败:', err);
@@ -69,25 +87,44 @@
                 }
             },
             async loadAuthors() {
-                const authorIds = [...new Set(this.recommendations.map(song => song.authorId))];
-                for (const id of authorIds) {
+                const songAuthorIds = [...new Set(this.songs.map(song => song.authorId))];
+                for (const id of songAuthorIds) {
                     try {
                         const response = await axios.get(`/XuJunxi_CloudMusic/user/getUserById?id=${id}`);
                         if (response.data.success) {
-                            this.authors.set(id, response.data.user.username);
-                            console.log(`获取作者${response.data.user.username}信息成功`);
+                            this.songAuthors.set(id, response.data.user.username);
+                            console.log(`获取歌曲作者${response.data.user.username}信息成功`);
                         }
                     } catch (err) {
-                        console.warn(`获取作者${id}信息失败:`, err);
+                        console.warn(`获取歌曲作者${id}信息失败:`, err);
+                    }
+                }
+                const albumAuthorIds = [...new Set(this.albums.map(album => album.authorId))];
+                for (const id of albumAuthorIds) {
+                    try {
+                        const response = await axios.get(`/XuJunxi_CloudMusic/user/getUserById?id=${id}`);
+                        if (response.data.success) {
+                            this.albumAuthors.set(id, response.data.user.username);
+                            console.log(`获取专辑作者${response.data.user.username}信息成功`);
+                        }
+                    } catch (err) {
+                        console.warn(`获取专辑作者${id}信息失败:`, err);
                     }
                 }
             },
-            getAuthorName(authorId) {
-                return this.authors.get(authorId) || '未知作者';
+            getSongAuthorName(authorId) {
+                return this.songAuthors.get(authorId) || '未知作者';
+            },
+            getAlbumAuthorName(authorId) {
+                return this.albumAuthors.get(authorId) || '未知作者';
             },
             viewSong(songId) {
                 // 页面跳转
                 window.location.href = `song.html?id=${songId}`;
+            },
+            viewAlbum(albumId) {
+                // 页面跳转
+                window.location.href = `album.html?albumId=${albumId}`;
             }
         }
     })
