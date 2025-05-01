@@ -14,18 +14,19 @@ public interface AlbumService {
     // 更新专辑
     boolean updateAlbum(Album album);
 
+    boolean approveAlbumPublic(Album album);
+
     // 根据ID查询专辑
     Album getAlbumById(int id);
 
     // 根据作者ID查询专辑
     List<Album> getAlbumByAuthorId(int authorId);
 
-    // 查询所有专辑
-    List<Album> getAllAlbums();
-
     // 根据专辑标题精确查找专辑
     Album getAlbumByTitle(String title);
 
     // 根据专辑名模糊搜索专辑
     List<Album> searchAlbumsByTitle(String keyword);
+    // 获取随机专辑
+    List<Album> getRandomRecommendations(int count);
 }

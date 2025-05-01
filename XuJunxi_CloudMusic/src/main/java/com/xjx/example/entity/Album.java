@@ -10,10 +10,7 @@ public class Album {
     private Integer authorId;
     private LocalDateTime createdAt;
     private String coverUrl; // 专辑封面
-    private List<Song> songs; // 专辑中的歌曲列表
-
-    public Album() {
-    }
+    private boolean isPublic; // 是否公开
 
     public Integer getId() {
         return id;
@@ -55,11 +52,11 @@ public class Album {
         this.coverUrl = coverUrl;
     }
 
-    public List<Song> getSongs() {
-        return songs;
+    public boolean isPublic() {
+        return isPublic;
     }
 
-    public void setSongs(List<Song> songs) {
-        this.songs = songs;
+    public void setPublic(boolean isPublic) {
+        this.isPublic = isPublic;
     }
 }

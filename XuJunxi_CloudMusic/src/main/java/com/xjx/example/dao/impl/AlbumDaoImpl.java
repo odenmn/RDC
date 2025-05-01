@@ -39,9 +39,9 @@ public class AlbumDaoImpl implements AlbumDao {
 
     @Override
     public boolean updateAlbum(Album album) throws SQLException {
-        String sql = "UPDATE album SET title = ?, author_id = ?, created_at = ?, cover_url = ? WHERE id = ?";
+        String sql = "UPDATE album SET title = ?, author_id = ?, created_at = ?, cover_url = ?, is_public = ? WHERE id = ?";
         try (Connection conn = JDBCUtil.getConnection()) {
-            int rows = JDBCUtil.executeUpdate(conn, sql, album.getTitle(), album.getAuthorId(), album.getCreatedAt(), album.getCoverUrl(), album.getId());
+            int rows = JDBCUtil.executeUpdate(conn, sql, album.getTitle(), album.getAuthorId(), album.getCreatedAt(), album.getCoverUrl(), album.isPublic(), album.getId());
             return rows > 0;
         }
     }
@@ -73,8 +73,8 @@ public class AlbumDaoImpl implements AlbumDao {
     }
 
     @Override
-    public List<Album> getAllAlbums() throws SQLException {
-        String sql = "SELECT * FROM album";
+    public List<Album> getAllAlbumsPublic() throws SQLException {
+        String sql = "SELECT * FROM album WHERE is_public = true";
         List<Album> albums = new ArrayList<>();
         try (Connection conn = JDBCUtil.getConnection()) {
             try (ResultSet rs = JDBCUtil.executeQuery(conn, sql)) {
@@ -135,6 +135,7 @@ public class AlbumDaoImpl implements AlbumDao {
         album.setAuthorId(rs.getInt("author_id"));
         album.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         album.setCoverUrl(rs.getString("cover_url"));
+        album.setPublic(rs.getBoolean("is_public"));
         return album;
     }
 }

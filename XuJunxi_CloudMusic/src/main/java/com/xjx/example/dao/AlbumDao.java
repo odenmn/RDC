@@ -19,7 +19,7 @@ public interface AlbumDao {
     Album getAlbumById(int id) throws SQLException;
 
     // 查询所有专辑
-    List<Album> getAllAlbums() throws SQLException;
+    List<Album> getAllAlbumsPublic() throws SQLException;
 
     // 新增方法：根据专辑标题精确查找专辑
     Album getAlbumByTitle(String title) throws SQLException;

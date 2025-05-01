@@ -4,12 +4,15 @@ import com.xjx.example.dao.AlbumDao;
 import com.xjx.example.dao.impl.AlbumDaoImpl;
 import com.xjx.example.entity.Album;
 import com.xjx.example.service.AlbumService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class AlbumServiceImpl implements AlbumService {
+    private static final Logger logger = LoggerFactory.getLogger(SongServiceImpl.class);
 
     private final AlbumDao albumDao = new AlbumDaoImpl();
 
@@ -36,6 +39,17 @@ public class AlbumServiceImpl implements AlbumService {
     @Override
     public boolean updateAlbum(Album album) {
         try {
+            return albumDao.updateAlbum(album);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean approveAlbumPublic(Album album) {
+        try {
+            album.setPublic(true);
             return albumDao.updateAlbum(album);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -72,23 +86,23 @@ public class AlbumServiceImpl implements AlbumService {
             return null;
         }
     }
-
-    @Override
-    public List<Album> getAllAlbums() {
-        try {
-            return albumDao.getAllAlbums();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     @Override
     public List<Album> searchAlbumsByTitle(String keyword) {
         try {
             return albumDao.searchAlbumsByTitle(keyword);
         } catch (SQLException e) {
             e.printStackTrace();
+            return null;
+        }
+    }
+    @Override
+    public List<Album> getRandomRecommendations(int count) {
+        try {
+            List<Album> allAlbumIds = albumDao.getAllAlbumsPublic();
+            Collections.shuffle(allAlbumIds); // 打乱顺序
+            return allAlbumIds.subList(0, Math.min(count, allAlbumIds.size()));
+        } catch (Exception e) {
+            logger.error("获取随机推荐失败", e);
             return null;
         }
     }

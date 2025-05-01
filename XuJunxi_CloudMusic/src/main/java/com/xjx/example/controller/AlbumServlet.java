@@ -9,6 +9,7 @@ import com.xjx.example.service.impl.AlbumServiceImpl;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
 
@@ -19,7 +20,11 @@ public class AlbumServlet extends BaseServlet{
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=UTF-8");
-        int albumId = Integer.parseInt(request.getParameter("albumId"));
+        BufferedReader reader = request.getReader();
+        String line = reader.readLine();
+        JSONObject json = JSONObject.parseObject(line);
+        int albumId = json.getInteger("albumId");
+//        int albumId = Integer.parseInt(request.getParameter("albumId"));
         Album album = albumService.getAlbumById(albumId);
         JSONObject jsonResponse = new JSONObject();
         jsonResponse.put("success", album != null);
@@ -47,5 +52,22 @@ public class AlbumServlet extends BaseServlet{
         response.getWriter().write(jsonResponse.toJSONString());
     }
 
+    public void getRandomRecommendations(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
+        int count = 5;
+        List<Album> albums = albumService.getRandomRecommendations(count);
+        JSONObject jsonResponse = new JSONObject();
+        if (albums != null) {
+            jsonResponse.put("success", true);
+            jsonResponse.put("message", "获取随机推荐专辑成功");
+            jsonResponse.put("albums", albums);
+        } else {
+            jsonResponse.put("success", false);
+            jsonResponse.put("message", "获取随机推荐专辑失败");
+        }
+        response.getWriter().write(jsonResponse.toJSONString());
+    }
 
 }
