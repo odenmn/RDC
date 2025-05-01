@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>专辑审核</title>
+    <link rel="stylesheet" href="css/process.css">
+</head>
+<body>
+<div id="app">
+    <h2  style="text-align: center">专辑详情</h2>
+    <div>
+        <template>
+            <el-table
+                    :data="tableData"
+                    stripe
+                    style="width: 100%">
+                <el-table-column
+                        type="index"
+                        width="50">
+                </el-table-column>
+                <el-table-column
+                        prop="uploadTime"
+                        label="上传日期"
+                        align="center"
+                        :formatter="formatTime">
+                </el-table-column>
+                <el-table-column
+                        prop="title"
+                        label="歌名"
+                        align="center">
+                </el-table-column>
+                <el-table-column
+                        label="查看"
+                        align="center">
+                    <template slot-scope="scope">
+                        <el-button type="primary" @click="viewSong(scope.row.id)">查看</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </template>
+        <button @click="approveReview(reviewId)">通过</button>
+        <button @click="rejectReview(reviewId)">不通过</button>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                reviewId: '',
+                albumId: '',
+                album: [],
+                tableData: [],
+                totalCount: ''
+            }
+        },
+        mounted() {
+            const urlParams = new URLSearchParams(window.location.search);
+            this.albumId = urlParams.get('albumId');
+            this.reviewId = urlParams.get('reviewId');
+            this.fetchAlbum(this.albumId);
+        },
+        methods: {
+            // 时间格式化方法
+            formatTime(row, column, cellValue) {
+                if (!cellValue) return '未知时间';
+                // 处理Java LocalDateTime格式（兼容带毫秒的情况）
+                const dateStr = cellValue.replace('T', ' ').split('.')[0];
+                const date = new Date(dateStr);
+                // 补零函数
+                const pad = n => n.toString().padStart(2, '0');
+                return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}
+                ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+            },
+            fetchAlbum(id) {
+                axios.post('/XuJunxi_CloudMusic/song/getSongsByAlbumId', {
+                    albumId: id
+                })
+                    .then(response => {
+                        if (response.data.success){
+                            this.tableData = response.data.songs;
+                        }
+                        else {
+                            alert(response.data.message);
+                        }
+                    })
+                    .catch(error => {
+                        alert(error);
+                    })
+            },
+            viewSong(songId) {
+                window.location.href = `song.html?id=${songId}`;
+            },
+            approveReview(id) {
+                axios.post('/XuJunxi_CloudMusic/admin/approveReview', new URLSearchParams({
+                    reviewId : id
+                }),{
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }).then(response => {
+                    if (response.data.success){
+                        alert('歌曲审核设置通过完成');
+                    } else {
+                        alert('歌曲审核通过设置失败');
+                    }
+                    window.location.href = 'admin.html';
+                })
+            },
+            rejectReview(id) {
+                axios.post('/XuJunxi_CloudMusic/admin/rejectReview', new URLSearchParams({
+                    reviewId : id
+                }),{
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }).then(response => {
+                    if (response.data.success){
+                        alert('专辑审核设置未通过完成');
+                    } else {
+                        alert('专辑审核未通过设置失败');
+                    }
+                    alert('专辑审核未通过');
+                    window.location.href = 'admin.html';
+                })
+            }
+        }
+    })
+</script>
+</body>
+</html>
