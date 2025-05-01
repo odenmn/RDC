@@ -34,7 +34,7 @@
                 <div>
                     <template>
                         <el-table
-                                :data="uploadSong"
+                                :data="haveUploadSong"
                                 stripe
                                 style="width: 100%"
                                 @selection-change="handleSelectionChange">
@@ -85,7 +85,7 @@
             data: {
                 isMusician: '',
                 activeTab: 'uploadSong',
-                uploadSong: [],
+                haveUploadSong: [],
                 songTitle: '',
                 album: '',
                 albumId: '',
@@ -114,7 +114,7 @@
                 fetchNonAlbumUploadSong() {
                     axios.get('/XuJunxi_CloudMusic/song/getNonAlbumSongsByAuthorId')
                         .then(response => {
-                            this.uploadSong = response.data.songs;
+                            this.haveUploadSong = response.data.songs;
                         })
                 },
                 // 检查用户是否为音乐人
@@ -160,7 +160,10 @@
                             alert('歌曲上传成功！');
                             this.songTitle = '';
                             this.album = '';
+                            this.genre = '';
                             this.songFile = null;
+                            // 刷新页面
+                            window.location.reload();
                         } else {
                             alert('歌曲上传失败：' + response.data.message);
                         }
