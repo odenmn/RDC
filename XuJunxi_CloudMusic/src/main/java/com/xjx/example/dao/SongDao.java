@@ -15,8 +15,7 @@ public interface SongDao {
     List<Song> getNonAlbumSongsByAuthorId(int authorId);
     List<Song> getAllSongsPublic();
     // 模糊搜索方法
-    List<Song> searchSongsByTitle(String keyword, int begin, int pageSize);
-    List<Song> selectByPage(int begin, int pageSize) throws SQLException;
+    List<Song> searchSongsByTitleWithSort(String keyword, int begin, int pageSize, String sortBy, String order);
     int getTotalCountByKeyword(String keyword) throws Exception;
     List<Song> getSongsByAlbumId(int albumId);
 }

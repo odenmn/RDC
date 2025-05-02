@@ -111,34 +111,25 @@ public class SongDaoImpl implements SongDao {
     }
 
     @Override
-    public List<Song> searchSongsByTitle(String keyword,int begin, int pageSize) {
+    public List<Song> searchSongsByTitleWithSort(String keyword, int begin, int pageSize, String sortBy, String order) {
         List<Song> songs = new ArrayList<>();
         if (keyword == null || keyword.isEmpty()) {
             return songs;
         }
-        String sql = "SELECT * FROM song WHERE title LIKE ? AND is_public = true LIMIT ?, ?";
+
+        // 构建SQL语句，使用动态排序字段和顺序
+        String sql = "SELECT * FROM song WHERE title LIKE ? AND is_public = true ORDER BY " + sortBy + " " + order + " LIMIT ?, ?";
+
         try (Connection connection = JDBCUtil.getConnection();
              ResultSet rs = JDBCUtil.executeQuery(connection, sql, "%" + keyword + "%", begin, pageSize)) {
-                while (rs.next()) {
-                    songs.add(mapResultSetToSong(rs));
-                }
+
+            while (rs.next()) {
+                songs.add(mapResultSetToSong(rs));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return songs;
-    }
-
-    @Override
-    public List<Song> selectByPage(int begin, int pageSize) throws SQLException {
-        String sql = "SELECT * FROM song LIMIT ?, ?";
-        try (Connection connection = JDBCUtil.getConnection();
-            ResultSet rs = JDBCUtil.executeQuery(connection, sql, begin, pageSize)){
-            List<Song> songs = new ArrayList<>();
-            while (rs.next()) {
-                songs.add(mapResultSetToSong(rs));
-            }
-            return songs;
-        }
     }
 
     @Override

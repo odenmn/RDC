@@ -116,16 +116,25 @@ public class SongServiceImpl implements SongService {
         }
     }
     @Override
-    public PageBean<Song> searchSongsByTitle(String keyword, int currentPage, int pageSize) {
+    public PageBean<Song> searchSongsByTitleWithSort(String keyword, int currentPage, int pageSize, String sortBy, String order) {
         try {
             int begin = (currentPage - 1) * pageSize;
-            List<Song> songs = songDao.searchSongsByTitle(keyword, begin, pageSize);
-            // 获取作者名
-            for (Song song: songs) {
+
+            // 校验排序字段合法性
+            String validSortBy = "title".equalsIgnoreCase(sortBy) ? "title" : "upload_time";
+
+            // 校验排序方式
+            String validOrder = "desc".equalsIgnoreCase(order) ? "DESC" : "ASC";
+
+            List<Song> songs = songDao.searchSongsByTitleWithSort(keyword, begin, pageSize, validSortBy, validOrder);
+
+            for (Song song : songs) {
                 String authorName = userService.getUserById(song.getAuthorId()).getUsername();
                 song.setAuthorName(authorName);
             }
+
             int totalCount = songDao.getTotalCountByKeyword(keyword);
+
             PageBean<Song> pageBean = new PageBean<>();
             pageBean.setTotalCount(totalCount);
             pageBean.setRows(songs);

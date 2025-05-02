@@ -160,7 +160,9 @@ public class SongServlet extends BaseServlet{
         int currentPage = Integer.parseInt(request.getParameter("currentPage"));
         int pageSize = Integer.parseInt(request.getParameter("pageSize"));
         String keyword = request.getParameter("keyword");
-        PageBean<Song> pageBean = songService.searchSongsByTitle(keyword, currentPage, pageSize);
+        String sortBy = request.getParameter("sortBy");
+        String order = request.getParameter("order");
+        PageBean<Song> pageBean = songService.searchSongsByTitleWithSort(keyword, currentPage, pageSize, sortBy, order);
 
         JSONObject jsonResponse = new JSONObject();
         jsonResponse.put("success", true);
