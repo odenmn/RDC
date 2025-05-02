@@ -4,9 +4,10 @@ import com.xjx.example.dao.FollowDao;
 import com.xjx.example.util.JDBCUtil;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FollowDaoImpl implements FollowDao {
 
@@ -25,8 +26,8 @@ public class FollowDaoImpl implements FollowDao {
     @Override
     public boolean isFollowing(int followerId, int followeeId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM follow WHERE follower_id = ? AND followee_id = ?";
-        try (Connection connection = JDBCUtil.getConnection()) {
-            ResultSet rs = JDBCUtil.executeQuery(connection, sql, followerId, followeeId);
+        try (Connection connection = JDBCUtil.getConnection();
+            ResultSet rs = JDBCUtil.executeQuery(connection, sql, followerId, followeeId)){
             if (rs.next()) {
                 return rs.getInt(1) > 0;
             }
@@ -37,8 +38,8 @@ public class FollowDaoImpl implements FollowDao {
     @Override
     public int getFollowerCount(int userId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM follow WHERE followee_id = ?";
-        try (Connection connection = JDBCUtil.getConnection()) {
-            ResultSet rs = JDBCUtil.executeQuery(connection, sql, userId);
+        try (Connection connection = JDBCUtil.getConnection();
+            ResultSet rs = JDBCUtil.executeQuery(connection, sql, userId)){
             if (rs.next()) {
                 return rs.getInt(1);
             }
@@ -49,12 +50,25 @@ public class FollowDaoImpl implements FollowDao {
     @Override
     public int getFollowingCount(int userId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM follows WHERE follower_id = ?";
-        try (Connection connection = JDBCUtil.getConnection()) {
-            ResultSet rs = JDBCUtil.executeQuery(connection, sql, userId);
+        try (Connection connection = JDBCUtil.getConnection();
+            ResultSet rs = JDBCUtil.executeQuery(connection, sql, userId)){
             if (rs.next()) {
                 return rs.getInt(1);
             }
         }
         return 0;
+    }
+
+    @Override
+    public List<Integer> getFollowersByMusicianId(int musicianId) throws SQLException {
+        String sql = "SELECT follower_id FROM follow WHERE followee_id = ?";
+        try (Connection connection = JDBCUtil.getConnection();
+            ResultSet rs = JDBCUtil.executeQuery(connection, sql, musicianId)){
+            List<Integer> followers = new ArrayList<>();
+            while (rs.next()) {
+                followers.add(rs.getInt("follower_id"));
+            }
+            return followers;
+        }
     }
 }

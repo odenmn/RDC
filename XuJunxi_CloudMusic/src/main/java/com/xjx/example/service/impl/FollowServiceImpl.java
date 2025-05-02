@@ -4,6 +4,7 @@ import com.xjx.example.dao.FollowDao;
 import com.xjx.example.dao.impl.FollowDaoImpl;
 import com.xjx.example.service.FollowService;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,6 +60,16 @@ public class FollowServiceImpl implements FollowService {
         } catch (Exception e) {
             logger.log(Level.SEVERE, "获取关注数失败，用户ID: " + userId, e);
             return 0;
+        }
+    }
+
+    @Override
+    public List<Integer> getFollowersByMusicianId(int musicianId) {
+        try {
+            return followDao.getFollowersByMusicianId(musicianId);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "获取粉丝列表失败，音乐人ID: " + musicianId, e);
+            return null;
         }
     }
 }
