@@ -185,7 +185,7 @@ public class MusicianServlet extends BaseServlet {
 
                     // 写入磁盘
                     try {
-                        fileItem.write(storeFile); // 注意：这个方法会自动关闭流
+                        fileItem.write(storeFile);
                     } catch (Exception e) {
                         e.printStackTrace();
                         jsonResponse.put("success", false);
@@ -262,8 +262,7 @@ public class MusicianServlet extends BaseServlet {
         System.out.println("json:"+json);
         int[] songIds = json.getJSONArray("songIds").toJavaObject(int[].class);
         int albumId = json.getInteger("albumId");
-//        int[] songIds = JSON.parseObject(request.getParameter("songIds"), int[].class);
-//        int albumId = Integer.parseInt(request.getParameter("albumId"));
+
         boolean isAdded = songService.addSongsIntoAlbum(songIds, albumId);
         System.out.println("isAdded:"+isAdded);
         if (isAdded) {
