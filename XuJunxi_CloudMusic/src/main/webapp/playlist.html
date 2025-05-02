@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>歌单详情</title>
+</head>
+<body>
+<div id="app">
+    <h2  style="text-align: center">歌单详情</h2>
+    <div>
+        <template>
+            <el-table
+                    :data="songs"
+                    stripe
+                    style="width: 100%">
+                <el-table-column
+                        type="index"
+                        width="50">
+                </el-table-column>
+                <el-table-column
+                        prop="title"
+                        label="歌名"
+                        align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="authorName"
+                        label="歌手"
+                        align="center">
+                </el-table-column>
+                <el-table-column
+                        label="查看"
+                        align="center">
+                    <template slot-scope="scope">
+                        <el-button type="primary" @click="viewSong(scope.row.id)">查看</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        label="移出歌单"
+                        align="center">
+                    <template slot-scope="scope">
+                        <el-button type="danger" @click="removeSongFromPlaylist(scope.row.id)">移出</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </template>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                playlistId: '',
+                songs: [],
+                songAuthors: {},
+            }
+        },
+        mounted() {
+            const urlParams = new URLSearchParams(window.location.search);
+            this.playlistId = urlParams.get('playlistId');
+            this.fetchPlaylist(this.playlistId);
+        },
+        methods: {
+            fetchPlaylist(id) {
+                axios.post('/XuJunxi_CloudMusic/playlist/getSongsInPlaylist', {
+                    playlistId: id
+                })
+                    .then(async response => {
+                        if (response.data.success) {
+                            this.songs = response.data.songs;
+                        } else {
+                            alert(response.data.message);
+                        }
+                    })
+            },
+            viewSong(songId) {
+                window.location.href = `song.html?id=${songId}`;
+            },
+            removeSongFromPlaylist(songId) {
+                axios.post('/XuJunxi_CloudMusic/playlist/removeSongFromPlaylist', {
+                    playlistId: this.playlistId,
+                    songId: songId
+                })
+                    .then(response => {
+                        if (response.data.success){
+                            alert('移出成功');
+                            this.fetchPlaylist(this.playlistId);
+                        }
+                        else {
+                            alert(response.data.message);
+                        }
+                    })
+            }
+        }
+    })
+</script>
+</body>
+</html>

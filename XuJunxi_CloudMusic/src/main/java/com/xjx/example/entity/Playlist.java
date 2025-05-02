@@ -1,23 +1,21 @@
 package com.xjx.example.entity;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
 public class Playlist {
     private Integer id;
     private String name;
-    private int userId;
-    private Date createdAt;
-    private Date updatedAt;
+    private Integer userId;
+    private LocalDateTime createdAt;
     private String coverUrl; // 歌单封面
-    private List<Song> songs;
 
-    // Getters and setters
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -29,30 +27,21 @@ public class Playlist {
         this.name = name;
     }
 
-    public int getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
     }
 
-    public Date getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
     public String getCoverUrl() {
         return coverUrl;
     }
@@ -61,11 +50,4 @@ public class Playlist {
         this.coverUrl = coverUrl;
     }
 
-    public List<Song> getSongs() {
-        return songs;
-    }
-
-    public void setSongs(List<Song> songs) {
-        this.songs = songs;
-    }
 }
