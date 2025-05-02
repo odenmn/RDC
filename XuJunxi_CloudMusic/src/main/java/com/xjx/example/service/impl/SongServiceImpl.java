@@ -77,16 +77,6 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public boolean rejectSongPublic(Song song) {
-        try {
-            song.setPublic(false);
-            return songDao.updateSong(song);
-        } catch (Exception e) {
-            logger.warn("更新歌曲失败: {}", song, e);
-            return false;
-        }
-    }
-    @Override
     public boolean deleteSong(int id) {
         try {
             return songDao.deleteSong(id);

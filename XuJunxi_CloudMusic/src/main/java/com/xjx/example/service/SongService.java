@@ -11,7 +11,6 @@ public interface SongService {
     boolean addSongsIntoAlbum(int[] songIds, int albumId);
     boolean removeSongFromAlbum(Song song);
     boolean approveSongPublic(Song song);
-    boolean rejectSongPublic(Song song);
     boolean deleteSong(int id);
     Song getSongById(int id);
     List<Song> getSongsByAuthorId(int authorId);
