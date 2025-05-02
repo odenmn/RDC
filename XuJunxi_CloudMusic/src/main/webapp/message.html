@@ -3,9 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>我收到的消息</title>
-    <!-- 引入 Vue 和 Axios -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -31,30 +28,126 @@
     <div v-if="messages.length === 0">
         <p>暂无消息</p>
     </div>
-    <div v-else>
-        <div class="message-item" v-for="message in messages" :key="message.id">
-            <h3>{{ message.title }}</h3>
-            <p>{{ message.content }}</p>
-            <small>时间: {{ message.timestamp }}</small>
-        </div>
+    <div v-else class="message-item">
+        <template>
+            <el-table
+                    :data="messages"
+                    stripe
+                    style="width: 100%">
+                <el-table-column
+                        type="index"
+                        width="50">
+                </el-table-column>
+                <el-table-column
+                        prop="title"
+                        label="标题"
+                        align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="createdAt"
+                        label="时间"
+                        align="center"
+                        :formatter="formatTime">
+                </el-table-column>
+                <el-table-column
+                        prop="isRead"
+                        label="状态"
+                        align="center"
+                        :formatter="(row) => row.read ? '已读' : '未读'">
+                </el-table-column>
+                <el-table-column
+                        label="内容"
+                        align="center">
+                    <template slot-scope="scope">
+                        <el-button type="primary" @click="showMessageContent(scope.row)">查看</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </template>
+        <el-dialog title="消息内容" :visible.sync="dialogVisible" width="30%">
+            <span>{{ selectedMessageContent }}</span>
+            <span slot="footer" class="dialog-footer">
+                 <!-- 如果是已读状态，则显示删除按钮 -->
+                <el-button v-if="selectedMessageRead" type="danger" @click="deleteMessage()">删除</el-button>
+                <el-button v-else type="success" @click="markAsRead()">标记为已读</el-button>
+                <el-button @click="dialogVisible = false">关闭</el-button>
+            </span>
+        </el-dialog>
     </div>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
 <script>
     new Vue({
         el: '#app',
         data: {
-            messages: [] // 消息列表
+            messages: [], // 消息列表
+            dialogVisible: false,
+            selectedMessageContent: '',
+            selectedMessageId: '',
+            selectedMessageRead: false
         },
         mounted() {
-            // 模拟从后端获取消息数据
-            axios.get('/api/messages') // 假设后端接口路径为 /api/messages
-                .then(response => {
-                    this.messages = response.data;
+            this.fetchMessages();
+        },
+        methods: {
+            // 时间格式化方法
+            formatTime(row, column, cellValue) {
+                if (!cellValue) return '未知时间';
+                // 处理Java LocalDateTime格式（兼容带毫秒的情况）
+                const dateStr = cellValue.replace('T', ' ').split('.')[0];
+                const date = new Date(dateStr);
+                // 补零函数
+                const pad = n => n.toString().padStart(2, '0');
+                return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}
+                ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+            },
+            fetchMessages() {
+                axios.get('/XuJunxi_CloudMusic/message/getUserMessages')
+                    .then(response => {
+                        console.log('获取消息成功:', response.data.messages);
+                        this.messages = response.data.messages;
+                    })
+                    .catch(error => {
+                        console.error('获取消息失败:', error);
+                    });
+            },
+            showMessageContent(message) {
+                this.selectedMessageContent = message.content;
+                this.selectedMessageId = message.id;
+                this.selectedMessageRead = message.read; // 获取消息的已读状态
+                this.dialogVisible = true;
+            },
+            markAsRead(id) {
+                axios.post('/XuJunxi_CloudMusic/message/markMessageAsRead', {
+                    messageId: this.selectedMessageId
                 })
-                .catch(error => {
-                    console.error('获取消息失败:', error);
-                });
+                    .then(response => {
+                        this.fetchMessages();
+                        this.dialogVisible = false;
+                    })
+                    .catch(error => {
+                        console.error('标记为已读失败:', error);
+                    });
+            },
+            deleteMessage() {
+                if (confirm('确定要删除这条消息吗？')) {
+                    axios.post('/XuJunxi_CloudMusic/message/deleteMessage', {
+                        messageId: this.selectedMessageId
+                    })
+                        .then(response => {
+                            console.log('删除成功:', response.data);
+                            this.fetchMessages(); // 刷新列表
+                            this.dialogVisible = false;
+                        })
+                        .catch(error => {
+                            console.error('删除失败:', error);
+                            alert('删除失败，请重试');
+                        });
+                }
+            }
         }
     });
 </script>

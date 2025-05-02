@@ -1,11 +1,12 @@
 package com.xjx.example.entity;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 public class Message {
     private Integer id;
-    private Integer userId;
+    private Integer senderId;
+    private Integer receiverId;
+    private String title;
     private String content;
     private boolean isRead;
     private LocalDateTime createdAt;
@@ -18,12 +19,28 @@ public class Message {
         this.id = id;
     }
 
-    public Integer getUserId() {
-        return userId;
+    public Integer getSenderId() {
+        return senderId;
     }
 
-    public void setUserId(Integer userId) {
-        this.userId = userId;
+    public void setSenderId(Integer senderId) {
+        this.senderId = senderId;
+    }
+
+    public Integer getReceiverId() {
+        return receiverId;
+    }
+
+    public void setReceiverId(Integer receiverId) {
+        this.receiverId = receiverId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getContent() {
