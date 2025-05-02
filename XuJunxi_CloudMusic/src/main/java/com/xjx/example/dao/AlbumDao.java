@@ -21,13 +21,13 @@ public interface AlbumDao {
     // 查询所有专辑
     List<Album> getAllAlbumsPublic() throws SQLException;
 
-    // 新增方法：根据专辑标题精确查找专辑
+    // 根据专辑标题精确查找专辑
     Album getAlbumByTitle(String title) throws SQLException;
 
-    // 新增方法：根据专辑名模糊搜索专辑
-    List<Album> searchAlbumsByTitle(String keyword) throws SQLException;
+    // 根据专辑名模糊分页搜索专辑
+    List<Album> searchAlbumsByTitle(String keyword, int begin, int pageSize);
+    int getTotalCountByKeyword(String keyword);
 
-    List<Album> selectByPage(int begin, int pageSize) throws SQLException;
 
     List<Album> getAlbumByAuthorId(int authorId) throws SQLException;
 }

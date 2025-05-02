@@ -13,4 +13,8 @@ public interface UserDao {
     boolean updateUser(User user) throws SQLException;
     boolean deleteUser(int id) throws SQLException;
     User getUserByEmail(String email) throws SQLException;
+
+    List<User> searchUsersByUsername(String keyword, int begin, int pageSize);
+
+    int getTotalCountByKeyword(String keyword);
 }

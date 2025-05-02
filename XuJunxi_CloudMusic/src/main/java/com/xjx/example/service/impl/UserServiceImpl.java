@@ -2,6 +2,7 @@ package com.xjx.example.service.impl;
 
 import com.xjx.example.dao.UserDao;
 import com.xjx.example.dao.impl.UserDaoImpl;
+import com.xjx.example.entity.PageBean;
 import com.xjx.example.entity.User;
 import com.xjx.example.service.UserService;
 import com.xjx.example.util.PasswordEncryptUtil;
@@ -157,4 +158,22 @@ public class UserServiceImpl implements UserService {
             return false;
         }
     }
+
+    @Override
+    public PageBean<User> searchUsersByUsername(String keyword, int currentPage, int pageSize) {
+        try {
+            int begin = (currentPage - 1) * pageSize;
+            List<User> users = userDao.searchUsersByUsername(keyword, begin, pageSize);
+            int totalCount = userDao.getTotalCountByKeyword(keyword);
+
+            PageBean<User> pageBean = new PageBean<>();
+            pageBean.setTotalCount(totalCount);
+            pageBean.setRows(users);
+            return pageBean;
+        } catch (Exception e) {
+            logger.warn("模糊搜索用户失败: {}", keyword, e);
+            return null;
+        }
+    }
+
 }

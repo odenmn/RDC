@@ -5,7 +5,6 @@ import com.xjx.example.entity.User;
 import com.xjx.example.util.JDBCUtil;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -88,6 +87,38 @@ public class UserDaoImpl implements UserDao {
             }
         }
         return null;
+    }
+
+    @Override
+    public List<User> searchUsersByUsername(String keyword, int begin, int pageSize) {
+        List<User> users = new ArrayList<>();
+        if (keyword == null || keyword.isEmpty()) {
+            return users;
+        }
+        String sql = "SELECT * FROM user WHERE username LIKE ? LIMIT ?, ?";
+        try (Connection connection = JDBCUtil.getConnection();
+             ResultSet rs = JDBCUtil.executeQuery(connection, sql, "%" + keyword + "%", begin, pageSize)) {
+            while (rs.next()) {
+                users.add(mapResultSetToUser(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    @Override
+    public int getTotalCountByKeyword(String keyword) {
+        String sql = "SELECT COUNT(*) FROM user WHERE username LIKE ?";
+        try (Connection connection = JDBCUtil.getConnection();
+             ResultSet rs = JDBCUtil.executeQuery(connection, sql, "%" + keyword + "%")) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     private User mapResultSetToUser(ResultSet rs) throws SQLException {

@@ -87,31 +87,37 @@ public class AlbumDaoImpl implements AlbumDao {
     }
 
     @Override
-    public List<Album> searchAlbumsByTitle(String keyword) throws SQLException {
-        String sql = "SELECT * FROM album WHERE title LIKE ?";
+    public List<Album> searchAlbumsByTitle(String keyword, int begin, int pageSize) {
         List<Album> albums = new ArrayList<>();
-        try (Connection conn = JDBCUtil.getConnection()) {
-            try (ResultSet rs = JDBCUtil.executeQuery(conn, sql, "%" + keyword + "%")) {
-                while (rs.next()) {
-                    albums.add(mapToAlbum(rs));
-                }
+        if (keyword == null || keyword.isEmpty()) {
+            return albums;
+        }
+        String sql = "SELECT * FROM album WHERE title LIKE ? LIMIT ?, ?";
+        try (Connection connection = JDBCUtil.getConnection();
+             ResultSet rs = JDBCUtil.executeQuery(connection, sql, "%" + keyword + "%", begin, pageSize)) {
+            while (rs.next()) {
+                albums.add(mapToAlbum(rs));
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return albums;
     }
 
     @Override
-    public List<Album> selectByPage(int begin, int pageSize) throws SQLException {
-        String sql = "SELECT * FROM album LIMIT ?, ?";
-        List<Album> albums = new ArrayList<>();
-        try (Connection conn = JDBCUtil.getConnection();
-            ResultSet rs = JDBCUtil.executeQuery(conn, sql, begin, pageSize)){
-            while (rs.next()) {
-                albums.add(mapToAlbum(rs));
+    public int getTotalCountByKeyword(String keyword) {
+        String sql = "SELECT COUNT(*) FROM album WHERE title LIKE ?";
+        try (Connection connection = JDBCUtil.getConnection();
+             ResultSet rs = JDBCUtil.executeQuery(connection, sql, "%" + keyword + "%")) {
+            if (rs.next()) {
+                return rs.getInt(1);
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return albums;
+        return 0;
     }
+
 
     @Override
     public List<Album> getAlbumByAuthorId(int authorId) throws SQLException {

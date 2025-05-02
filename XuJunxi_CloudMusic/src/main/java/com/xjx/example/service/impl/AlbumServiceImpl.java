@@ -3,6 +3,7 @@ package com.xjx.example.service.impl;
 import com.xjx.example.dao.AlbumDao;
 import com.xjx.example.dao.impl.AlbumDaoImpl;
 import com.xjx.example.entity.Album;
+import com.xjx.example.entity.PageBean;
 import com.xjx.example.service.AlbumService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,11 +88,18 @@ public class AlbumServiceImpl implements AlbumService {
         }
     }
     @Override
-    public List<Album> searchAlbumsByTitle(String keyword) {
+    public PageBean<Album> searchAlbumsByTitle(String keyword, int currentPage, int pageSize) {
         try {
-            return albumDao.searchAlbumsByTitle(keyword);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            int begin = (currentPage - 1) * pageSize;
+            List<Album> albums = albumDao.searchAlbumsByTitle(keyword, begin, pageSize);
+            int totalCount = albumDao.getTotalCountByKeyword(keyword);
+
+            PageBean<Album> pageBean = new PageBean<>();
+            pageBean.setTotalCount(totalCount);
+            pageBean.setRows(albums);
+            return pageBean;
+        } catch (Exception e) {
+            logger.warn("模糊搜索专辑失败: {}", keyword, e);
             return null;
         }
     }

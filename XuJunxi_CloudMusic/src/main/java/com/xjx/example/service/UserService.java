@@ -1,5 +1,6 @@
 package com.xjx.example.service;
 
+import com.xjx.example.entity.PageBean;
 import com.xjx.example.entity.User;
 
 import java.sql.SQLException;
@@ -18,4 +19,6 @@ public interface UserService {
     User login(String username, String password);
     boolean resetPassword(String email, String newPassword);
     boolean becomeMusician(User user);
+
+    PageBean<User> searchUsersByUsername(String keyword, int currentPage, int pageSize);
 }
