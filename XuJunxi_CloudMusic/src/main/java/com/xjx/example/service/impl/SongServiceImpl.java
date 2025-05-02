@@ -121,7 +121,7 @@ public class SongServiceImpl implements SongService {
             int begin = (currentPage - 1) * pageSize;
 
             // 校验排序字段合法性
-            String validSortBy = "title".equalsIgnoreCase(sortBy) ? "title" : "upload_time";
+            String validSortBy = "play_count".equalsIgnoreCase(sortBy) ? "play_count" : "upload_time";
 
             // 校验排序方式
             String validOrder = "desc".equalsIgnoreCase(order) ? "DESC" : "ASC";
