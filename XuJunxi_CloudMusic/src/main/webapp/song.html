@@ -23,11 +23,27 @@
     <button @click="addFollow">关注</button>
     <button @click="removeFollow">取消关注</button>
     <div>
-        <button @click="">添加到歌单</button>
+        <button @click="handleAddToPlaylist">添加到歌单</button>
         <button @click="downloadSong">下载歌曲</button>
     </div>
+    <!-- 添加到歌单的对话框 -->
+    <el-dialog title="选择歌单" :visible.sync="playlistDialogVisible" width="30%">
+        <el-select v-model="selectedPlaylistId" placeholder="请选择歌单" style="width: 100%;">
+            <el-option
+                    v-for="playlist in userPlaylists"
+                    :key="playlist.id"
+                    :label="playlist.name"
+                    :value="playlist.id">
+            </el-option>
+        </el-select>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="playlistDialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="confirmAddToPlaylist">确 定</el-button>
+        </span>
+    </el-dialog>
 </div>
-
+<script src="element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
 <script>
     new Vue({
         el: '#app',
@@ -36,7 +52,10 @@
             song: null,
             author: null,
             message: '',
-            hasIncreasedPlayCount: false // 添加一个标志，用于记录是否已经增加播放数
+            hasIncreasedPlayCount: false,// 添加一个标志，用于记录是否已经增加播放数
+            playlistDialogVisible: false,
+            userPlaylists: [],           // 用户所有歌单
+            selectedPlaylistId: null     // 当前选中的歌单 ID
         },
         watch: {
             song(newSong) {
@@ -173,6 +192,47 @@
                            alert(response.data.message)
                         }
                     })
+            },
+            // 打开模态框并加载用户歌单
+            handleAddToPlaylist() {
+                this.loadUserPlaylists();
+                this.playlistDialogVisible = true;
+            },
+
+            // 加载用户歌单
+            loadUserPlaylists() {
+                axios.get('/XuJunxi_CloudMusic/playlist/getPlaylistsByUserId')
+                    .then(response => {
+                        if (response.data.success) {
+                            this.userPlaylists = response.data.playlists;
+                        } else {
+                            this.$message.error('加载歌单失败：' + response.data.message);
+                        }
+                    });
+            },
+
+            // 确认添加到选中的歌单
+            confirmAddToPlaylist() {
+                if (!this.selectedPlaylistId) {
+                    this.$message.warning("请先选择一个歌单");
+                    return;
+                }
+
+                axios.post('/XuJunxi_CloudMusic/playlist/addSongToPlaylist', {
+                    songId: this.songId,
+                    playlistId: this.selectedPlaylistId
+                })
+                    .then(response => {
+                    if (response.data.success) {
+                        this.$message.success("歌曲已成功添加到歌单！");
+                        this.playlistDialogVisible = false;
+                    } else {
+                        this.$message.error("添加失败：" + response.data.message);
+                    }
+                }).catch(error => {
+                    this.$message.error("请求失败，请重试");
+                    console.error(error);
+                });
             },
             // 下载功能，使用浏览器的下载行为
             downloadSong() {
