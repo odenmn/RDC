@@ -259,5 +259,22 @@ public class UserServlet extends BaseServlet {
         jsonResponse.put("pageBean", pageBean);
         response.getWriter().write(jsonResponse.toJSONString());
     }
+
+    public void loginStatus(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
+        HttpSession session = request.getSession(false);
+        String error = (String) session.getAttribute("login_error");
+        JSONObject json = new JSONObject();
+        json.put("error", error);
+        if (session != null && session.getAttribute("user") != null) {
+            json.put("isLoggedIn", true);
+        } else {
+            json.put("isLoggedIn", false);
+        }
+        response.getWriter().write(json.toJSONString());
+
+    }
 }
 

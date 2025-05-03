@@ -47,11 +47,15 @@
 
             },
             created() {
-                // 获取cookie
                 this.username = this.getCookie('username');
                 this.password = this.getCookie('password');
                 this.remember = this.getCookie('remember');
-                console.log(this.username);
+                axios.get('/XuJunxi_CloudMusic/user/loginStatus')
+                    .then(response => {
+                        if (!response.data.isLoggedIn) {
+                            this.errorMessage = response.data.error;
+                        }
+                    });
 
             },
             methods: {
