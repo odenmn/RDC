@@ -2,6 +2,7 @@ package com.xjx.example.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.xjx.example.entity.Album;
+import com.xjx.example.entity.PageBean;
 import com.xjx.example.entity.User;
 import com.xjx.example.service.AlbumService;
 import com.xjx.example.service.impl.AlbumServiceImpl;
@@ -24,7 +25,6 @@ public class AlbumServlet extends BaseServlet{
         String line = reader.readLine();
         JSONObject json = JSONObject.parseObject(line);
         int albumId = json.getInteger("albumId");
-//        int albumId = Integer.parseInt(request.getParameter("albumId"));
         Album album = albumService.getAlbumById(albumId);
         JSONObject jsonResponse = new JSONObject();
         jsonResponse.put("success", album != null);
@@ -67,6 +67,24 @@ public class AlbumServlet extends BaseServlet{
             jsonResponse.put("success", false);
             jsonResponse.put("message", "获取随机推荐专辑失败");
         }
+        response.getWriter().write(jsonResponse.toJSONString());
+    }
+
+    public void searchAlbumsByTitle(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
+        BufferedReader reader = request.getReader();
+        String line = reader.readLine();
+        JSONObject json = JSONObject.parseObject(line);
+        String keyword = json.getString("keyword");
+        int currentPage = json.getInteger("currentPage");
+        int pageSize = json.getInteger("pageSize");
+        PageBean<Album> pageBean = albumService.searchAlbumsByTitle(keyword, currentPage, pageSize);
+        JSONObject jsonResponse = new JSONObject();
+        jsonResponse.put("success", true);
+        jsonResponse.put("message", "搜索专辑成功");
+        jsonResponse.put("pageBean", pageBean);
         response.getWriter().write(jsonResponse.toJSONString());
     }
 

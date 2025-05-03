@@ -157,11 +157,18 @@ public class SongServlet extends BaseServlet{
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=UTF-8");
-        int currentPage = Integer.parseInt(request.getParameter("currentPage"));
-        int pageSize = Integer.parseInt(request.getParameter("pageSize"));
-        String keyword = request.getParameter("keyword");
-        String sortBy = request.getParameter("sortBy");
-        String order = request.getParameter("order");
+        BufferedReader reader = request.getReader();
+        StringBuilder jsonBuilder = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            jsonBuilder.append(line);
+        }
+        JSONObject json = JSONObject.parseObject(jsonBuilder.toString());
+        String keyword = json.getString("keyword");
+        int currentPage = json.getInteger("currentPage");
+        int pageSize = json.getInteger("pageSize");
+        String sortBy = json.getString("sortBy");
+        String order = json.getString("order");
         PageBean<Song> pageBean = songService.searchSongsByTitleWithSort(keyword, currentPage, pageSize, sortBy, order);
 
         JSONObject jsonResponse = new JSONObject();

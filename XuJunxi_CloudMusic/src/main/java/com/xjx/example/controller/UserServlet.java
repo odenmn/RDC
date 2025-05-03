@@ -2,6 +2,7 @@ package com.xjx.example.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.xjx.example.entity.PageBean;
 import com.xjx.example.entity.User;
 import com.xjx.example.service.UserService;
 import com.xjx.example.service.impl.UserServiceImpl;
@@ -11,6 +12,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -212,6 +214,24 @@ public class UserServlet extends BaseServlet {
             jsonResponse.put("message", "输入的邮箱未绑定该账户");
         }
         response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(jsonResponse.toJSONString());
+    }
+
+    public void searchUsersByUsername(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
+        BufferedReader reader = request.getReader();
+        String line = reader.readLine();
+        JSONObject json = JSONObject.parseObject(line);
+        String keyword = json.getString("keyword");
+        int currentPage = json.getInteger("currentPage");
+        int pageSize = json.getInteger("pageSize");
+        PageBean<User> pageBean = userService.searchUsersByUsername(keyword, currentPage, pageSize);
+        JSONObject jsonResponse = new JSONObject();
+        jsonResponse.put("success", true);
+        jsonResponse.put("message", "搜索成功");
+        jsonResponse.put("pageBean", pageBean);
         response.getWriter().write(jsonResponse.toJSONString());
     }
 }
