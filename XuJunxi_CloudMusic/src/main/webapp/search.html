@@ -139,6 +139,7 @@
                 <el-table-column
                         label="查看"
                         align="center">
+                    <el-button type="primary" @click="viewUser(scope.row.id)">查看</el-button>
                     <template slot-scope="scope">
                         <el-button type="primary" @click="viewUser(scope.row.id)">查看</el-button>
                     </template>
@@ -218,7 +219,7 @@
                 axios.post('/XuJunxi_CloudMusic/user/searchUsersByUsername', {
                     currentPage: this.currentPage,
                     pageSize: this.pageSize,
-                    keyword: this.searchForm.keyword,
+                    keyword: this.searchForm.keyword
                 })
                     .then(response => {
                         this.users = response.data.pageBean.rows;
