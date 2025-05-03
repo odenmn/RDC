@@ -5,9 +5,11 @@ import com.xjx.example.entity.Song;
 import com.xjx.example.entity.User;
 import com.xjx.example.service.LikeService;
 import com.xjx.example.service.SongService;
+import com.xjx.example.service.UserService;
 import com.xjx.example.service.impl.LikeServiceImpl;
 import com.alibaba.fastjson.JSON;
 import com.xjx.example.service.impl.SongServiceImpl;
+import com.xjx.example.service.impl.UserServiceImpl;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -15,12 +17,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @WebServlet("/like/*")
 public class LikeServlet extends BaseServlet {
     private final LikeService likeService = new LikeServiceImpl();
     private final SongService songService = new SongServiceImpl();
+    private final UserService userService = new UserServiceImpl();
 
     // 处理点赞操作
     public void addLike(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -75,21 +79,6 @@ public class LikeServlet extends BaseServlet {
         response.getWriter().write(jsonResponse.toJSONString());
     }
 
-//    // 检查点赞状态
-//    public void isLiked(HttpServletRequest request, HttpServletResponse response) throws IOException {
-//        request.setCharacterEncoding("UTF-8");
-//        response.setCharacterEncoding("UTF-8");
-//        response.setContentType("application/json;charset=UTF-8");
-//        User user = (User) request.getSession().getAttribute("user");
-//        int userId = user.getId();
-//        int songId = Integer.parseInt(request.getParameter("songId"));
-//        boolean result = likeService.isLiked(userId, songId);
-//        JSONObject jsonResponse = new JSONObject();
-//        jsonResponse.put("isLiked", result);
-//        jsonResponse.put("message", result ? "已点赞" : "未点赞");
-//        response.getWriter().write(jsonResponse.toJSONString());
-//    }
-
     // 获取点赞总数
     public void getLikeCount(HttpServletRequest request, HttpServletResponse response) throws IOException {
         request.setCharacterEncoding("UTF-8");
@@ -99,6 +88,25 @@ public class LikeServlet extends BaseServlet {
         int count = likeService.getLikeCount(songId);
         JSONObject jsonResponse = new JSONObject();
         jsonResponse.put("likeCount", count);
+        response.getWriter().write(jsonResponse.toJSONString());
+    }
+
+    public void getLikedSongsByUserId(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
+        User user = (User) request.getSession().getAttribute("user");
+        int userId = user.getId();
+        List<Song> songs = likeService.getLikedSongsByUserId(userId);
+        for (Song song : songs) {
+            Integer authorId = song.getAuthorId();
+            User author = userService.getUserById(authorId);
+            song.setAuthorName(author.getUsername());
+        }
+        JSONObject jsonResponse = new JSONObject();
+        jsonResponse.put("success", songs != null);
+        jsonResponse.put("message", songs != null ? "获取用户点赞歌曲成功" : "获取用户点赞歌曲失败");
+        jsonResponse.put("songs", songs);
         response.getWriter().write(jsonResponse.toJSONString());
     }
 }
