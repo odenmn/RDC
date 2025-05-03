@@ -54,7 +54,7 @@ body {
 }
 
 .form-img {
-    height: 40px; /* 可根据实际调整 */
+    height: 40px;
     width: auto;
     cursor: pointer;
 }
