@@ -1,0 +1,52 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f7fa;
+    margin: 0;
+    padding: 20px;
+}
+
+.user-card {
+    max-width: 400px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+}
+
+.user-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+}
+
+.user-name {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.user-info {
+    font-size: 14px;
+    color: #666;
+}
+
+.actions {
+    margin-top: 20px;
+}
+
+.btn-follow {
+    padding: 8px 16px;
+    background-color: #409EFF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-follow:hover {
+    background-color: #337ecc;
+}
