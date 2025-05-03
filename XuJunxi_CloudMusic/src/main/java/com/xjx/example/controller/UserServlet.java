@@ -9,6 +9,7 @@ import com.xjx.example.service.impl.UserServiceImpl;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -103,16 +104,40 @@ public class UserServlet extends BaseServlet {
             response.getWriter().write(jsonResponse.toJSONString());
             return;
         }
-        if ("true".equals(remember)) {
-            // 如果用户选择了记住密码，将用户信息保存到会话中
-            request.getSession().setAttribute("remember", true);
-        } else {
-            // 如果用户没有选择记住密码，将用户信息从会话中移除
-            request.getSession().removeAttribute("remember");
-        }
         User user = userService.login(username, password);
 
         if (user != null) {
+            if ("true".equals(remember)) {
+                // 如果用户选择了记住我，则设置Cookie的过期时间为一周
+                Cookie usernameCookie = new Cookie("username", username);
+                Cookie passwordCookie = new Cookie("password", password);
+                Cookie rememberCookie = new Cookie("remember", "true");
+                // 设置 Cookie 属性
+                usernameCookie.setPath("/");
+                passwordCookie.setPath("/");
+                rememberCookie.setPath("/");
+                usernameCookie.setMaxAge(7 * 24 * 60 * 60);
+                passwordCookie.setMaxAge(7 * 24 * 60 * 60);
+                rememberCookie.setMaxAge(7 * 24 * 60 * 60);
+                response.addCookie(usernameCookie);
+                response.addCookie(passwordCookie);
+                response.addCookie(rememberCookie);
+            }else {
+                // 清除Cookie
+                Cookie usernameCookie = new Cookie("username", "");
+                Cookie passwordCookie = new Cookie("password", "");
+                Cookie rememberCookie = new Cookie("remember", "");
+                usernameCookie.setPath("/");
+                passwordCookie.setPath("/");
+                rememberCookie.setPath("/");
+                usernameCookie.setMaxAge(0);
+                passwordCookie.setMaxAge(0);
+                rememberCookie.setMaxAge(0);
+                response.addCookie(usernameCookie);
+                response.addCookie(passwordCookie);
+                response.addCookie(rememberCookie);
+            }
+
             // 将用户信息保存到会话中
             HttpSession session = request.getSession(true);
             session.setAttribute("user", user);

@@ -46,7 +46,21 @@
                 captchaUrl: '/XuJunxi_CloudMusic/checkCodeServlet'
 
             },
+            created() {
+                // 获取cookie
+                this.username = this.getCookie('username');
+                this.password = this.getCookie('password');
+                this.remember = this.getCookie('remember');
+                console.log(this.username);
+
+            },
             methods: {
+                getCookie(name) {
+                    // 构造一个正则表达式，用来精确匹配某个 Cookie 键值对
+                    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+                    // 如果匹配成功，返回匹配到的cookie的值
+                    return match ? decodeURIComponent(match[2]) : null;
+                },
                 login() {
                     this.checkCode = this.checkCode.trim();
                     if (this.checkCode === '') {
