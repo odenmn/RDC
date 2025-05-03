@@ -20,15 +20,45 @@ public class FollowServlet extends BaseServlet{
 
     // 处理添加关注操作
     public void addFollow(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        User user = (User) request.getSession().getAttribute("user");
-        int followerId = user.getId();
-        int songId = Integer.parseInt(request.getParameter("songId"));
-        Song song = songService.getSongById(songId);
-        int followeeId = song.getAuthorId();
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=UTF-8");
         JSONObject jsonResponse = new JSONObject();
+        User user = (User) request.getSession().getAttribute("user");
+        int followerId = user.getId();
+        String songIdStr = request.getParameter("songId");
+        String followerIdStr = request.getParameter("userId");
+        int followeeId;
+        // 直接搜索到用户，关注用户
+        if (songIdStr == null && followerIdStr != null){
+            followeeId = Integer.parseInt(followerIdStr);
+            if (followerId == followeeId){
+                jsonResponse.put("success", false);
+                jsonResponse.put("message", "不能关注自己");
+                response.getWriter().write(jsonResponse.toJSONString());
+                return;
+            }
+            // 判断是否已经关注
+            boolean isAlreadyFollowing = followService.isFollowing(followerId, followeeId);
+            if (isAlreadyFollowing) {
+                jsonResponse.put("success", false);
+                jsonResponse.put("message", "您已经关注了该用户");
+                response.getWriter().write(jsonResponse.toJSONString());
+                return;
+            }
+
+            boolean result = followService.addFollow(followerId, followeeId);
+            jsonResponse.put("success", result);
+            jsonResponse.put("message", result ? "关注成功" : "关注失败");
+            response.getWriter().write(jsonResponse.toJSONString());
+            return;
+        }
+
+        // 从歌曲中关注用户
+        int songId = Integer.parseInt(songIdStr);
+        Song song = songService.getSongById(songId);
+        followeeId = song.getAuthorId();
+
         if (followerId == followeeId){
             jsonResponse.put("success", false);
             jsonResponse.put("message", "不能关注自己");
@@ -52,15 +82,42 @@ public class FollowServlet extends BaseServlet{
 
     // 处理取消关注操作
     public void removeFollow(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        User user = (User) request.getSession().getAttribute("user");
-        int followerId = user.getId();
-        int songId = Integer.parseInt(request.getParameter("songId"));
-        Song song = songService.getSongById(songId);
-        int followeeId = song.getAuthorId();
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=UTF-8");
         JSONObject jsonResponse = new JSONObject();
+        User user = (User) request.getSession().getAttribute("user");
+        int followerId = user.getId();
+        String songIdStr = request.getParameter("songId");
+        String followerIdStr = request.getParameter("userId");
+        int followeeId;
+        if (songIdStr == null && followerIdStr != null){
+            followeeId = Integer.parseInt(followerIdStr);
+            if (followerId == followeeId){
+                jsonResponse.put("success", false);
+                jsonResponse.put("message", "不能关注自己");
+                response.getWriter().write(jsonResponse.toJSONString());
+                return;
+            }
+            // 判断是否已经关注
+            boolean isAlreadyFollowing = followService.isFollowing(followerId, followeeId);
+            if (!isAlreadyFollowing) {
+                jsonResponse.put("success", false);
+                jsonResponse.put("message", "您还未关注该用户");
+                response.getWriter().write(jsonResponse.toJSONString());
+                return;
+            }
+
+            boolean result = followService.removeFollow(followerId, followeeId);
+            jsonResponse.put("success", result);
+            jsonResponse.put("message", result ? "取消关注成功" : "取消关注失败");
+            response.getWriter().write(jsonResponse.toJSONString());
+            return;
+        }
+
+        int songId = Integer.parseInt(songIdStr);
+        Song song = songService.getSongById(songId);
+        followeeId = song.getAuthorId();
 
         // 判断是否已经关注
         boolean isAlreadyFollowing = followService.isFollowing(followerId, followeeId);
@@ -95,12 +152,13 @@ public class FollowServlet extends BaseServlet{
 
     // 获取粉丝数
     public void getFollowerCount(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int userId = Integer.parseInt(request.getParameter("authorId"));
+        int userId = Integer.parseInt(request.getParameter("id"));
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=UTF-8");
 
         int count = followService.getFollowerCount(userId);
+        System.out.println("粉丝数：" + count);
         JSONObject jsonResponse = new JSONObject();
         jsonResponse.put("followerCount", count);
         response.getWriter().write(jsonResponse.toJSONString());

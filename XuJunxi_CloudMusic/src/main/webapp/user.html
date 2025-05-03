@@ -1,10 +1,110 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>用户信息</title>
+    <link rel="stylesheet" href="css/user.css">
 </head>
 <body>
+<div id="app" class="container">
+    <div class="user-card" v-if="user">
+        <img :src="user.avatarUrl || 'images/default-avatar.png'" alt="用户头像" class="user-avatar">
+        <div class="user-name">{{ user.username }}</div>
+        <div class="user-info">粉丝数：{{ followerCount }}</div>
+        <div class="actions">
+            <button class="btn-follow" @click="followUser">关注</button>
+            <button class="btn-follow" @click="removeFollow">取消关注</button>
+        </div>
+    </div>
 
+    <div v-else>
+        <p style="text-align: center;">加载中...</p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            userId: '',
+            user: null,
+            followerCount: ''
+        },
+        created() {
+            const urlParams = new URLSearchParams(window.location.search);
+            this.userId = urlParams.get('id');
+            if (this.userId) {
+                this.loadUserInfo();
+                this.getFollowerCount();
+            }
+        },
+        methods: {
+            loadUserInfo() {
+                axios.get(`/XuJunxi_CloudMusic/user/getUserById?id=${this.userId}`)
+                    .then(response => {
+                        if (response.data.success) {
+                            this.user = response.data.user;
+                            console.log(this.user);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('获取用户信息失败:', error);
+                    });
+            },
+            getFollowerCount() {
+                axios.get(`/XuJunxi_CloudMusic/follow/getFollowerCount?id=${this.userId}`)
+                    .then(response => {
+                        this.followerCount = response.data.followerCount;
+
+                    })
+                    .catch(error => {
+                        console.error('获取粉丝数失败:', error);
+                    });
+            },
+            followUser() {
+                axios.post('/XuJunxi_CloudMusic/follow/addFollow', new URLSearchParams({
+                    userId: this.userId
+                }), {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                    .then(response => {
+                        if (response.data.success) {
+                            alert("关注成功！");
+                            this.getFollowerCount();
+                        } else {
+                            alert(response.data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('关注失败:', error);
+                        alert('关注失败，请重试');
+                    });
+            },
+            removeFollow(){
+                axios.post('/XuJunxi_CloudMusic/follow/removeFollow', new URLSearchParams({
+                    userId: this.userId
+                }), {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                    .then(response => {
+                        if (response.data.success) {
+                            alert("取消关注成功！");
+                            this.getFollowerCount();
+                        }
+                        else {
+                            alert(response.data.message)
+                        }
+                    })
+            }
+        }
+    });
+</script>
 </body>
 </html>
