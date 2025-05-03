@@ -68,3 +68,9 @@ body {
 .pagination button {
     margin: 0 5px;
 }
+.song-info {
+    display: flex;
+    align-items: center; /* 垂直居中 */
+    gap: 10px; /* 元素之间留出间距 */
+    color: white;
+}
