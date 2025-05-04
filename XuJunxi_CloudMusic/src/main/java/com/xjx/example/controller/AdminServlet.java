@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.xjx.example.entity.*;
 import com.xjx.example.service.*;
 import com.xjx.example.service.impl.*;
+import com.xjx.example.util.JsonUtil;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -224,6 +225,7 @@ public class AdminServlet extends BaseServlet {
 
     // 拒绝审核
     public void rejectReview(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        req.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
         Integer reviewId = getReviewIdFromRequest(req);
@@ -245,7 +247,7 @@ public class AdminServlet extends BaseServlet {
                 Message message = new Message();
                 message.setTitle("审核结果通知");
                 // 设置拒绝原因
-                String content = req.getParameter("content");
+                String content = req.getParameter("reason");
                 message.setContent("歌曲" + song.getTitle() + "未通过审核，拒绝原因：" + content);
                 message.setSenderId(user.getId());
                 message.setReceiverId(reviewService.getReviewById(reviewId).getUserId());
@@ -275,6 +277,19 @@ public class AdminServlet extends BaseServlet {
             }
             resp.getWriter().write(json.toJSONString());
         }
+    }
+
+    // 设置歌曲为会员专享
+    public void setSongVip(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
+
+        JSONObject json = JsonUtil.getJsonObject(request);
+        int songId = json.getInteger("songId");
+
+        json.put("success", songService.setSongVipOnly(songId));
+        response.getWriter().write(json.toJSONString());
     }
 
     // 分页

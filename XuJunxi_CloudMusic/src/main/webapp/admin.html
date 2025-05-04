@@ -6,11 +6,15 @@
 </head>
 <body>
 <div id="app">
-    <h2 style="text-align: center">审核列表</h2>
-    <div>
+    <el-tabs v-model="type" class="tab-container">
+        <el-tab-pane label="审核" name="1"></el-tab-pane>
+        <el-tab-pane label="管理" name="2"></el-tab-pane>
+    </el-tabs>
+    <div v-if="type === '1'">
+        <h2 style="text-align: center">审核列表</h2>
         <template>
             <el-table
-                    :data="tableData"
+                    :data="reviews"
                     stripe
                     style="width: 100%">
                 <el-table-column
@@ -53,7 +57,45 @@
                 :total="totalCount">
         </el-pagination>
     </div>
+    <div v-if="type === '2'">
+        <h2 style="text-align: center">管理列表</h2>
+        <template>
+            <el-table
+                    :data="songs"
+                    stripe
+                    style="width: 100%">
+                <el-table-column
+                        type="index"
+                        width="50">
+                </el-table-column>
+                <el-table-column
+                        prop="title"
+                        label="歌名"
+                        align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="authorName"
+                        label="作者"
+                        align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="isVipOnly"
+                        label="权限"
+                        align="center"
+                        :formatter="(row) => row.vipOnly ? 'vip歌曲' : '非vip歌曲'">
+                </el-table-column>
+                <el-table-column
+                        label="操作"
+                        align="center">
+                    <template slot-scope="scope">
+                        <el-button type="primary" @click="setSongVip(scope.row.id)">设置vip</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </template>
+    </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="element-ui/lib/index.js"></script>
@@ -66,13 +108,16 @@
             return {
                 currentPage: 1,
                 pageSize: 5,
-                tableData: [],
-                totalCount: ''
+                reviews: [],
+                totalCount: '',
+                type: '1',
+                songs: []
             }
         }
         ,
         mounted() {
             this.fetchReviews();
+            this.fetchSongs();
         },
         methods: {
             // 时间格式化方法
@@ -89,11 +134,23 @@
             fetchReviews() {
                 axios.get(`/XuJunxi_CloudMusic/admin/getPendingReviews?currentPage=${this.currentPage}&pageSize=${this.pageSize}`)
                     .then(response => {
-                        this.tableData = response.data.pageBean.rows;
+                        this.reviews = response.data.pageBean.rows;
                         this.totalCount = response.data.pageBean.totalCount;
                     })
                     .catch(error => {
-                        console.error('获取待审核歌曲失败:', error);
+                        console.error('获取待审核失败:', error);
+                    });
+            },
+            fetchSongs() {
+                axios.get('/XuJunxi_CloudMusic/song/getAllSongsPublic')
+                    .then(response => {
+                        if (response.data.success){
+                            this.songs = response.data.songs;
+                            console.log(this.songs);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('获取歌曲列表失败:', error);
                     });
             },
             processingReview(uploadWorkId, id, content) {
@@ -136,22 +193,26 @@
                         })
                 }
             },
-            approveSong(id) {
-                axios.post('/admin/approveSong', { reviewId: id })
+            setSongVip(id) {
+                // 找到当前歌曲对象
+                const song = this.songs.find(song => song.id === id);
+
+                // 判断是否已经是 VIP 歌曲
+                if (song && song.vipOnly) {
+                    alert('该歌曲已是 VIP 歌曲');
+                    return;
+                }
+                axios.post('/XuJunxi_CloudMusic/admin/setSongVip', {
+                    songId: id
+                })
                     .then(response => {
-                        this.fetchSongs();
+                        if (response.data.success) {
+                            alert('设置VIP成功')
+                            this.fetchSongs();
+                        }
                     })
                     .catch(error => {
-                        console.error('审核通过失败:', error);
-                    });
-            },
-            rejectSong(id) {
-                axios.post('/admin/rejectSong', { reviewId: id })
-                    .then(response => {
-                        this.fetchSongs();
-                    })
-                    .catch(error => {
-                        console.error('拒绝失败:', error);
+                        console.error('设置VIP失败:', error);
                     });
             },
             handleSizeChange(val) {
