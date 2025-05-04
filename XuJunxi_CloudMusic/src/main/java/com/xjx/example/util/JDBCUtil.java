@@ -106,21 +106,17 @@ public class JDBCUtil {
             rollbackTransaction(connection); // 出现异常时回滚事务
             e.printStackTrace();
         } finally {
-            closeResources(pstmt, null);
+            closeResources(pstmt);
         }
         return rows;
     }
 
     // 关闭资源
-    public static void closeResources(PreparedStatement pstmt, ResultSet rs) {
+    public static void closeResources(PreparedStatement pstmt) {
         try {
-            if (rs != null) {
-                rs.close();
-            }
             if (pstmt != null) {
                 pstmt.close();
             }
-            // 不再在这里关闭连接，因为事务可能需要保持连接打开
         } catch (SQLException e) {
             e.printStackTrace();
         }
