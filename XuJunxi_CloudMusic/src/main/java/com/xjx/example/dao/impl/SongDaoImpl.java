@@ -39,10 +39,10 @@ public class SongDaoImpl implements SongDao {
     @Override
     public boolean updateSong(Song song) throws SQLException {
         String sql = "UPDATE song SET title = ?, author_id = ?, album_id = ?, upload_time = ?, " +
-                     "genre = ?, like_count = ?, play_count = ?, audio_url = ?, is_public = ? WHERE id = ?";
+                     "genre = ?, like_count = ?, play_count = ?, audio_url = ?, is_public = ?, is_vip_only = ? WHERE id = ?";
         return JDBCUtil.executeUpdate(JDBCUtil.getConnection(), sql,
                 song.getTitle(), song.getAuthorId(), song.getAlbumId(),
-                song.getUploadTime(), song.getGenre(), song.getLikeCount(), song.getPlayCount(), song.getAudioUrl(),song.isPublic(), song.getId()) > 0;
+                song.getUploadTime(), song.getGenre(), song.getLikeCount(), song.getPlayCount(), song.getAudioUrl(),song.isPublic(), song.isVipOnly(), song.getId()) > 0;
     }
 
     @Override
@@ -175,6 +175,7 @@ public class SongDaoImpl implements SongDao {
         song.setPlayCount(rs.getInt("play_count"));
         song.setAudioUrl(rs.getString("audio_url"));
         song.setPublic(rs.getBoolean("is_public"));
+        song.setVipOnly(rs.getBoolean("is_vip_only"));
         return song;
     }
 }

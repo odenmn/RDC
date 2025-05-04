@@ -24,7 +24,9 @@
     <button @click="removeFollow">取消关注</button>
     <div>
         <button @click="handleAddToPlaylist">添加到歌单</button>
-        <button @click="downloadSong">下载歌曲</button>
+        <button @click="downloadSong" :disabled="!canDownload">
+            {{ canDownload ? '下载歌曲' : 'VIP专属歌曲不可下载' }}
+        </button>
     </div>
     <!-- 添加到歌单的对话框 -->
     <el-dialog title="选择歌单" :visible.sync="playlistDialogVisible" width="30%">
@@ -52,6 +54,7 @@
             song: null,
             author: null,
             message: '',
+            canDownload: false,
             hasIncreasedPlayCount: false,// 添加一个标志，用于记录是否已经增加播放数
             playlistDialogVisible: false,
             userPlaylists: [],           // 用户所有歌单
@@ -82,9 +85,8 @@
                     }
                 }).then(response => {
                     this.song = response.data.song;
-                    console.log(this.song.audioUrl);
-                    console.log(this.song);
                     this.author = response.data.author;
+                    this.canDownload = response.data.canDownload; // 设置是否可下载
                 })
             },
             setupAudioEvent(songId) {

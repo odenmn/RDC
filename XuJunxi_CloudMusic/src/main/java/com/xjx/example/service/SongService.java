@@ -15,12 +15,15 @@ public interface SongService {
     Song getSongById(int id);
     List<Song> getSongsByAuthorId(int authorId);
     List<Song> getNonAlbumSongsByAuthorId(int authorId);
-
     PageBean<Song> searchSongsByTitleWithSort(String keyword, int currentPage, int pageSize, String sortBy, String order);
+
+    List<Song> getAllSongsPublic();
 
     List<Song> getRandomRecommendations(int count);
 
     List<Song> getSongsByAlbumId(int albumId);
 
     boolean increasePlayCount(int songId);
+
+    boolean setSongVipOnly(int songId);
 }

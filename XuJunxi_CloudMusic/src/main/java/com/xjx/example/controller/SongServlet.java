@@ -8,12 +8,14 @@ import com.xjx.example.service.SongService;
 import com.xjx.example.service.UserService;
 import com.xjx.example.service.impl.SongServiceImpl;
 import com.xjx.example.service.impl.UserServiceImpl;
+import com.xjx.example.util.JsonUtil;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @WebServlet("/song/*")
@@ -76,12 +78,26 @@ public class SongServlet extends BaseServlet{
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=UTF-8");
+        JSONObject jsonResponse = new JSONObject();
 
         int songId = Integer.parseInt(request.getParameter("songId"));
         Song song = songService.getSongById(songId);
         int authorId = song.getAuthorId();
         User author = userService.getUserById(authorId);
-        JSONObject jsonResponse = new JSONObject();
+
+        User user = (User) request.getSession().getAttribute("user");
+        boolean isVip = userService.isUserVip(user);
+        System.out.println("isVip: " + isVip);
+        if (song.isVipOnly()) {
+            if (isVip) {
+                jsonResponse.put("canDownload", true);
+            } else {
+                jsonResponse.put("canDownload", false);
+            }
+        } else {
+            jsonResponse.put("canDownload", true);
+        }
+
         jsonResponse.put("success", song != null);
         jsonResponse.put("message", song != null ? "获取歌曲成功" : "获取歌曲失败");
         jsonResponse.put("song", song);
@@ -157,13 +173,7 @@ public class SongServlet extends BaseServlet{
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=UTF-8");
-        BufferedReader reader = request.getReader();
-        StringBuilder jsonBuilder = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            jsonBuilder.append(line);
-        }
-        JSONObject json = JSONObject.parseObject(jsonBuilder.toString());
+        JSONObject json = JsonUtil.getJsonObject(request);
         String keyword = json.getString("keyword");
         int currentPage = json.getInteger("currentPage");
         int pageSize = json.getInteger("pageSize");
@@ -177,6 +187,24 @@ public class SongServlet extends BaseServlet{
         jsonResponse.put("pageBean", pageBean);
         response.getWriter().write(jsonResponse.toJSONString());
     }
+
+    public void getAllSongsPublic(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
+        List<Song> songs = songService.getAllSongsPublic();
+        for (Song song : songs) {
+            Integer authorId = song.getAuthorId();
+            User author = userService.getUserById(authorId);
+            song.setAuthorName(author.getUsername());
+        }
+        JSONObject jsonResponse = new JSONObject();
+        jsonResponse.put("success", songs != null);
+        jsonResponse.put("message", songs != null ? "获取所有公开歌曲成功" : "获取所有公开歌曲失败");
+        jsonResponse.put("songs", songs);
+        response.getWriter().write(jsonResponse.toJSONString());
+    }
+
 
     public void getRandomRecommendations(HttpServletRequest request, HttpServletResponse response) throws IOException {
         request.setCharacterEncoding("UTF-8");
@@ -221,4 +249,5 @@ public class SongServlet extends BaseServlet{
         }
         response.getWriter().write(jsonResponse.toJSONString());
     }
+
 }

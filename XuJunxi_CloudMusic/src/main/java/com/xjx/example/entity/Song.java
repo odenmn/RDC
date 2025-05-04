@@ -15,6 +15,7 @@ public class Song {
     private int playCount; // 播放量
     private String audioUrl; // 音频文件地址
     private boolean isPublic; // 是否公开
+    private boolean isVipOnly;
 
     // Getter and Setter for isPublic
     public boolean isPublic() {
@@ -101,5 +102,13 @@ public class Song {
 
     public void setAudioUrl(String audioUrl) {
         this.audioUrl = audioUrl;
+    }
+
+    public boolean isVipOnly() {
+        return isVipOnly;
+    }
+
+    public void setVipOnly(boolean vipOnly) {
+        isVipOnly = vipOnly;
     }
 }

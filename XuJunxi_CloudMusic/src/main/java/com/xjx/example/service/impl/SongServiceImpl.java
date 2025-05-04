@@ -146,6 +146,16 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    public List<Song> getAllSongsPublic() {
+        try {
+            return songDao.getAllSongsPublic();
+        } catch (Exception e) {
+            logger.error("获取所有公共歌曲失败", e);
+            return null;
+        }
+    }
+
+    @Override
     public List<Song> getRandomRecommendations(int count) {
         try {
             List<Song> allSongs = songDao.getAllSongsPublic();
@@ -175,6 +185,18 @@ public class SongServiceImpl implements SongService {
             return songDao.updateSong(song);
         } catch (Exception e) {
             logger.warn("更新歌曲播放次数失败: {}", songId, e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean setSongVipOnly(int songId) {
+        try {
+            Song song = songDao.getSongById(songId);
+            song.setVipOnly(true);
+            return songDao.updateSong(song);
+        } catch (Exception e) {
+            logger.warn("更新歌曲VIPOnly属性失败: {}", songId, e);
             return false;
         }
     }
