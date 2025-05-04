@@ -286,13 +286,14 @@ public class UserServlet extends BaseServlet {
     // 获取原始访问的URL
     public void getOriginalUrl(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession(false);
-        String originalUrl = session.getAttribute("originalUrl") != null ? (String) session.getAttribute("originalUrl") : "/";
-
+        String originalUrl = (String) session.getAttribute("originalUrl");
+        System.out.println("originalUrl: " + originalUrl);
         JSONObject json = new JSONObject();
         json.put("originalUrl", originalUrl);
-
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(json.toJSONString());
+        // 删除session中的originalUrl，以确保只获取一次
+        session.removeAttribute("originalUrl");
     }
 
     public void updatePhone(HttpServletRequest request, HttpServletResponse response) throws IOException {
