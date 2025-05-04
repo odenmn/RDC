@@ -42,6 +42,9 @@ public class LoginFilter implements Filter {
             // 放行
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
+            // 保存原始请求路径到 session
+            String originalUrl = request.getRequestURI();
+            session.setAttribute("originalUrl", originalUrl);
             request.getSession().setAttribute("login_error", "您尚未登录");
             request.getRequestDispatcher("/login.html").forward(request, servletResponse);
         }
