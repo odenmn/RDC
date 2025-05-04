@@ -18,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -112,11 +113,11 @@ public class UserServlet extends BaseServlet {
             return;
         }
         User user = userService.login(username, password);
-
         if (user != null) {
             if ("true".equals(remember)) {
                 // 如果用户选择了记住我，则设置Cookie的过期时间为一周
-                Cookie usernameCookie = new Cookie("username", username);
+
+                Cookie usernameCookie = new Cookie("username", URLEncoder.encode(username, "UTF-8"));
                 Cookie passwordCookie = new Cookie("password", password);
                 Cookie rememberCookie = new Cookie("remember", "true");
                 // 设置 Cookie 属性
@@ -187,12 +188,10 @@ public class UserServlet extends BaseServlet {
             if (user.getPhone() == null){
                 user.setPhone("暂无");
             }
-            if (user.getAvatar() == null){
-                user.setAvatar("暂未设置");
-            }
+            JSONObject userJson = new JSONObject();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             String createdTime = user.getCreatedAt().format(formatter);
-            JSONObject userJson = new JSONObject();
+
             userJson.put("user",user);
             userJson.put("createdTime",createdTime);
             response.setContentType("application/json;charset=UTF-8");

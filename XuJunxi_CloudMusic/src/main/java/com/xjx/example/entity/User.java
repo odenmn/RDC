@@ -1,5 +1,6 @@
 package com.xjx.example.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class User {
@@ -11,16 +12,15 @@ public class User {
     private String avatar; // 头像
     private String phone; // 手机号
     private LocalDateTime createdAt;
-    private boolean isMusician; // 是否为音乐人
     private Integer role = 0; // 0表示普通用户，1表示音乐人，2表示管理员
-    private boolean isAdmin; // 新增字段，标识是否为管理员
+    private BigDecimal walletBalance = BigDecimal.ZERO;
+    private LocalDateTime vipExpiry;
 
-    // Getters and setters
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -88,4 +88,19 @@ public class User {
         this.role = role;
     }
 
+    public BigDecimal getWalletBalance() {
+        return walletBalance;
+    }
+
+    public void setWalletBalance(BigDecimal walletBalance) {
+        this.walletBalance = walletBalance;
+    }
+
+    public LocalDateTime getVipExpiry() {
+        return vipExpiry;
+    }
+
+    public void setVipExpiry(LocalDateTime vipExpiry) {
+        this.vipExpiry = vipExpiry;
+    }
 }

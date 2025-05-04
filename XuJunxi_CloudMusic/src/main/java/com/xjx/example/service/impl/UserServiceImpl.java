@@ -1,22 +1,28 @@
 package com.xjx.example.service.impl;
 
 import com.xjx.example.dao.UserDao;
+import com.xjx.example.dao.VipPlanDao;
 import com.xjx.example.dao.impl.UserDaoImpl;
+import com.xjx.example.dao.impl.VipPlanDaoImpl;
 import com.xjx.example.entity.PageBean;
 import com.xjx.example.entity.User;
+import com.xjx.example.entity.VipPlan;
 import com.xjx.example.service.UserService;
 import com.xjx.example.util.PasswordEncryptUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class UserServiceImpl implements UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserDao userDao = new UserDaoImpl();
-
+    private final VipPlanDao vipPlanDao = new VipPlanDaoImpl();
     @Override
     public boolean addUser(User user) {
         try {
@@ -198,4 +204,64 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public boolean rechargeWallet(User user, BigDecimal amount) {
+        try {
+            user.setWalletBalance(user.getWalletBalance().add(amount));
+            return userDao.updateUser(user);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean purchaseVip(User user, int planId) {
+        try {
+            VipPlan plan = vipPlanDao.getPlanById(planId);
+
+            if (user.getWalletBalance().compareTo(plan.getPrice()) < 0) {
+                return false;
+            }
+
+            // 获取当前时间
+            LocalDateTime now = LocalDateTime.now();
+
+            // 计算新的到期时间
+            LocalDateTime newExpiry;
+            if (user.getVipExpiry() != null && user.getVipExpiry().isAfter(now)) {
+                // 如果已有VIP，从到期时间继续叠加
+                newExpiry = user.getVipExpiry().plusDays(plan.getDurationDays());
+            } else {
+                // 否则从当前时间开始
+                newExpiry = now.plusDays(plan.getDurationDays());
+            }
+
+            // 扣款 + 更新VIP时间
+            user.setWalletBalance(user.getWalletBalance().subtract(plan.getPrice()));
+            user.setVipExpiry(newExpiry);
+            return userDao.updateUser(user);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isUserVip(User user) {
+        if (user.getVipExpiry() == null) {
+            return false;
+        }
+        return LocalDateTime.now().isBefore(user.getVipExpiry());
+    }
+
+    @Override
+    public List<VipPlan> getAllVipPlans() {
+        try {
+            return vipPlanDao.getAllPlans();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

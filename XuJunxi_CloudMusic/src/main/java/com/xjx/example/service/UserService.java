@@ -2,7 +2,9 @@ package com.xjx.example.service;
 
 import com.xjx.example.entity.PageBean;
 import com.xjx.example.entity.User;
+import com.xjx.example.entity.VipPlan;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -26,4 +28,12 @@ public interface UserService {
     boolean becomeMusician(User user);
 
     PageBean<User> searchUsersByUsername(String keyword, int currentPage, int pageSize);
+
+    boolean rechargeWallet(User user, BigDecimal amount);
+
+    boolean purchaseVip(User user, int planId);
+
+    boolean isUserVip(User user);
+
+    List<VipPlan> getAllVipPlans();
 }

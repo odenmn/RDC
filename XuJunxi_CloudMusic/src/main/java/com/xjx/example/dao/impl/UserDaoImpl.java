@@ -7,12 +7,14 @@ import com.xjx.example.util.JDBCUtil;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoImpl implements UserDao {
     @Override
-    public boolean addUser(User user) throws SQLException { // 修改为boolean
+    public boolean addUser(User user) throws SQLException {
         String sql = "INSERT INTO user (username, email, password, salt, role) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = JDBCUtil.getConnection()) {
             return JDBCUtil.executeUpdate(conn, sql, user.getUsername(), user.getEmail(), user.getPassword(), user.getSalt(), user.getRole()) > 0; // 返回执行结果
@@ -62,9 +64,11 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public boolean updateUser(User user) throws SQLException { // 修改为boolean
-        String sql = "UPDATE user SET username = ?, email = ?, password = ?, avatar_url = ?, phone = ?, role = ? WHERE id = ?";
+        String sql = "UPDATE user SET username = ?, email = ?, password = ?, avatar_url = ?, " +
+                "phone = ?, role = ?, wallet_balance = ?, vip_expiry = ? WHERE id = ?";
         try (Connection conn = JDBCUtil.getConnection()) {
-            return JDBCUtil.executeUpdate(conn, sql, user.getUsername(), user.getEmail(), user.getPassword(), user.getAvatar(), user.getPhone(), user.getRole(), user.getId()) > 0; // 返回执行结果
+            return JDBCUtil.executeUpdate(conn, sql, user.getUsername(), user.getEmail(), user.getPassword(), user.getAvatar(),
+                    user.getPhone(), user.getRole(), user.getWalletBalance(), user.getVipExpiry(), user.getId()) > 0; // 返回执行结果
         }
     }
 
@@ -132,6 +136,10 @@ public class UserDaoImpl implements UserDao {
         user.setSalt(rs.getString("salt"));
         user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         user.setRole(rs.getInt("role"));
+        user.setWalletBalance(rs.getBigDecimal("wallet_balance"));
+        Timestamp vipExpiryTs = rs.getTimestamp("vip_expiry");
+        LocalDateTime vipExpiry = (vipExpiryTs != null) ? vipExpiryTs.toLocalDateTime() : null;
+        user.setVipExpiry(vipExpiry);
         return user;
     }
 }

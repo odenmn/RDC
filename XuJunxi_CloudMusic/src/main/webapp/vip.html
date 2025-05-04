@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>会员中心</title>
+    <link href="css/vip.css" rel="stylesheet">
+</head>
+<body>
+<div id="app">
+    <h1>会员中心</h1>
+    <div v-if="user" class="user-info">
+        <div class="user-avatar">
+            <img :src="user.avatar" alt="头像" v-if="user.avatar">
+        </div>
+        <div class="user-details">
+            <p><strong>用户名：</strong>{{ user.username }}</p>
+        </div>
+        <div class="vip-status">
+            <p><strong>VIP状态：</strong>{{ isVip() ? '已开通' : '未开通' }}</p>
+
+            <p v-if="remainingVipDays > 0" style="color: green;">
+                剩余天数：{{ remainingVipDays }} 天
+            </p>
+        </div>
+        <h2>我的钱包余额：{{ user.walletBalance ? user.walletBalance.toFixed(2) : '0.00' }}</h2>
+    </div>
+
+    <div class="recharge-section">
+        <h3>充值</h3>
+        <input type="number" v-model.number="rechargeAmount" placeholder="输入金额" step="0.01" />
+        <button @click="recharge">充值</button>
+    </div>
+
+    <div class="plans-section">
+        <h3>VIP 套餐</h3>
+        <div v-for="plan in plans" :key="plan.id" class="plan">
+            <h4>{{ plan.name }} - {{ plan.durationDays }} 天</h4>
+            <p>价格：￥{{ plan.price.toFixed(2) }}</p>
+            <button @click="purchaseVip(plan)">立即购买</button>
+        </div>
+    </div>
+</div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            user: null,
+            plans: [],
+            rechargeAmount: '',
+        },
+        created() {
+            this.fetchUserInfo();
+            this.isVip();
+            this.fetchVipPlans();
+        },
+        computed: {
+            remainingVipDays() {
+                if (!this.user || this.user.vipExpiry === 0) {
+                    return null;
+                }
+
+                const expiryDate = new Date(this.user.vipExpiry);
+                const today = new Date();
+
+                // 计算剩余毫秒数
+                const diffMs = expiryDate - today;
+
+                // 转换为天数（向下取整）
+                const diffDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+
+                return diffDays;
+            }
+        },
+        methods: {
+            fetchUserInfo() {
+                axios.get('/XuJunxi_CloudMusic/user/displayPersonalInfo')
+                    .then(response => {
+                        this.user = response.data.user;
+                    })
+                    .catch(error => {
+                        console.error('获取用户信息失败:', error);
+                    });
+            },
+            isVip() {
+                return this.remainingVipDays > 0;
+            },
+            // 获取VIP套餐
+            fetchVipPlans() {
+                axios.get('/XuJunxi_CloudMusic/vip/getAllVipPlans')
+                    .then(response => {
+                        this.plans = response.data;
+                    })
+                    .catch(error => {
+                        console.error('获取VIP套餐失败:', error);
+                    });
+            },
+            // 充值
+            recharge() {
+                if (this.rechargeAmount <= 0) {
+                    alert("请输入有效的充值金额");
+                    return;
+                }
+
+                axios.post('/XuJunxi_CloudMusic/vip/rechargeWallet', {
+                    amount: this.rechargeAmount
+                }).then(res => {
+                    const data = res.data;
+                    if (data.success) {
+                        alert("充值成功！");
+                        this.rechargeAmount = '';
+                        this.fetchUserInfo(); // 刷新用户信息
+                        this.isVip();
+                    } else {
+                        alert(data.message || "充值失败");
+                    }
+                }).catch(err => {
+                    alert("网络错误，请重试");
+                    console.error('充值请求失败:', err);
+                });
+            },
+            // 购买VIP
+            purchaseVip(plan) {
+                if (!confirm(`确认购买 ${plan.name}？价格：￥${plan.price}`)) return;
+
+                axios.post('/XuJunxi_CloudMusic/vip/purchaseVip', {
+                    planId: plan.id
+                }).then(res => {
+                    const data = res.data;
+                    if (data.success) {
+                        alert("购买成功！");
+                        this.fetchUserInfo(); // 刷新用户信息
+                    } else {
+                        alert(data.message || "购买失败");
+                    }
+                }).catch(err => {
+                    alert("网络错误，请重试");
+                    console.error('购买VIP失败:', err);
+                });
+            }
+        }
+    })
+</script>
+</html>
