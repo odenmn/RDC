@@ -62,9 +62,9 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public boolean updateUser(User user) throws SQLException { // 修改为boolean
-        String sql = "UPDATE user SET username = ?, email = ?, password = ?, role = ? WHERE id = ?";
+        String sql = "UPDATE user SET username = ?, email = ?, password = ?, avatar_url = ?, phone = ?, role = ? WHERE id = ?";
         try (Connection conn = JDBCUtil.getConnection()) {
-            return JDBCUtil.executeUpdate(conn, sql, user.getUsername(), user.getEmail(), user.getPassword(), user.getRole(), user.getId()) > 0; // 返回执行结果
+            return JDBCUtil.executeUpdate(conn, sql, user.getUsername(), user.getEmail(), user.getPassword(), user.getAvatar(), user.getPhone(), user.getRole(), user.getId()) > 0; // 返回执行结果
         }
     }
 

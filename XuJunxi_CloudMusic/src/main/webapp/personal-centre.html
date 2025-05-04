@@ -18,7 +18,14 @@
             <div v-if="user">
                 <p>用户名：{{ user.username }}</p>
                 <p>手机号码：{{ user.phone }}</p>
-                <p>头像：{{ user.avatar }}</p>
+                <input v-model="phone" placeholder="请输入新手机号">
+                <button @click="updatePhone">提交</button>
+                <p>头像</p>
+                <img :src="avatarUrl" v-if="avatarUrl" style="width: 110px; height: 100px; border-radius: 50%; margin-top: 10px;">
+                <form @submit.prevent="uploadAvatar">
+                    <input type="file" @change="handleAvatarFileUpload" required  ref="fileInput">
+                    <button type="submit">上传</button>
+                </form>
                 <p>注册时间：{{ createdTime }}</p>
                 <p>是否为音乐人：{{ user.role == 1 ? '是' : '否' }}</p>
             </div>
@@ -52,17 +59,61 @@
                 resetEmail: '',
                 newPassword: '',
                 confirmPassword: '',
-                passwordResetMessage: ''
+                passwordResetMessage: '',
+                avatarUrl: '',
+                phone: '',
+                avatarFile: null
             },
             created() {
                 this.fetchUserInfo(); // 页面加载时获取用户信息
             },
             methods: {
+                updatePhone() {
+                    axios.post('/XuJunxi_CloudMusic/user/updatePhone', new URLSearchParams({
+                        phone: this.phone
+                    }), {
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    }).then(res => {
+                        const data = res.data;
+                        if (data.success) {
+                            alert('手机号更新成功');
+                            this.phone = '';
+                            this.fetchUserInfo();
+                        }
+                    }).catch(err => {
+                        console.error('更新失败:', err);
+                        this.message = '更新失败，请检查网络';
+                    });
+                },
+                handleAvatarFileUpload(event) {
+                    this.avatarFile = event.target.files[0];
+                },
+                uploadAvatar() {
+                    const formData = new FormData();
+                    formData.append('avatar', this.avatarFile);
+                    axios.post('/XuJunxi_CloudMusic/user/uploadAvatar', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }).then(response => {
+                        if (response.data.success) {
+                            alert('头像上传成功');
+                            this.avatarFile = null;
+                            // 手动清空文件选择框
+                            this.$refs.fileInput.value = '';
+                            this.fetchUserInfo();
+                        }
+                    })
+                },
                 fetchUserInfo() {
                     axios.get('/XuJunxi_CloudMusic/user/displayPersonalInfo') // 调用后端接口获取用户信息
                         .then(response => {
                             this.user = response.data.user; // 将返回的用户信息赋值给 user
                             this.createdTime = response.data.createdTime;
+                            this.avatarUrl = this.user.avatar
+                            console.log(this.avatarUrl);
                         })
                         .catch(error => {
                             console.error('获取用户信息失败:', error);

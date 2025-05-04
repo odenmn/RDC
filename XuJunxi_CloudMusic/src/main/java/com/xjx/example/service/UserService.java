@@ -18,6 +18,11 @@ public interface UserService {
     boolean adminRegister(User user, String adminInviteCode);
     User login(String username, String password);
     boolean resetPassword(String email, String newPassword);
+
+    boolean updatePhone(User user, String newPhone);
+
+    boolean updateAvatar(User user, String newAvatar);
+
     boolean becomeMusician(User user);
 
     PageBean<User> searchUsersByUsername(String keyword, int currentPage, int pageSize);

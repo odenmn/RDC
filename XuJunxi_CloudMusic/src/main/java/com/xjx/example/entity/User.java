@@ -80,17 +80,10 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    // 新增字段的 getter 和 setter
-    public boolean isMusician() {
-        return isMusician;
-    }
-
-    public void setMusician(boolean musician) {
-        this.isMusician = musician;
-    }
     public Integer getRole() {
         return role;
     }
+
     public void setRole(Integer role) {
         this.role = role;
     }

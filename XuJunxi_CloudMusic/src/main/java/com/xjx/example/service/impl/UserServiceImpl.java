@@ -148,6 +148,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean updatePhone(User user, String newPhone) {
+        try {
+            user.setPhone(newPhone);
+            return userDao.updateUser(user);
+        } catch (SQLException e) {
+            logger.error("更新手机号失败: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean updateAvatar(User user, String newAvatar) {
+        try {
+            user.setAvatar(newAvatar);
+            return userDao.updateUser(user);
+        } catch (SQLException e) {
+            logger.error("更新头像失败: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
     public boolean becomeMusician(User user) {
         try {
             // 更新用户状态为音乐人
