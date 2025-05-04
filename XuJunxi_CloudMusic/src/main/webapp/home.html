@@ -19,46 +19,14 @@
                 <li><a href="myMusic.html">我的音乐</a></li>
                 <li><a href="personal-centre.html">个人信息</a></li>
                 <li><a href="message.html">我的消息</a></li>
-                <li><a href="music-square.html">音乐广场</a></li>
+                <li><a href="musicSquare.html">音乐广场</a></li>
                 <li><a href="creatorCentre.html">创作者中心</a></li>
+                <li><a href="vip.html">会员中心</a></li>
+                <li><a href="login.html">退出登录</a></li>
             </ul>
         </div>
 
-        <!-- 音乐广场 -->
-        <div id="music-square" class="section" style="display:none;">
-            <h2>音乐广场</h2>
-
-
         </div>
     </div>
-
-    <script>
-
-        // 分页功能
-        let currentPage = 1;
-        function prevPage() {
-            if (currentPage > 1) {
-                currentPage--;
-                alert(`当前页：${currentPage}`);
-            }
-        }
-        function nextPage() {
-            currentPage++;
-            alert(`当前页：${currentPage}`);
-        }
-
-        // 显示选中的部分
-        document.querySelectorAll('.main-menu a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                if (this.getAttribute('href') === '#music-square') {
-                    e.preventDefault();
-                    document.querySelectorAll('.section').forEach(section => {
-                        section.style.display = 'none';
-                    });
-                    document.getElementById('music-square').style.display = 'block';
-                }
-            });
-        });
-    </script>
 </body>
 </html>
