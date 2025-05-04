@@ -107,7 +107,6 @@
             fetchMessages() {
                 axios.get('/XuJunxi_CloudMusic/message/getUserMessages')
                     .then(response => {
-                        console.log('获取消息成功:', response.data.messages);
                         this.messages = response.data.messages;
                     })
                     .catch(error => {

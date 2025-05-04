@@ -112,8 +112,7 @@
                         .then(response => {
                             this.user = response.data.user; // 将返回的用户信息赋值给 user
                             this.createdTime = response.data.createdTime;
-                            this.avatarUrl = this.user.avatar
-                            console.log(this.avatarUrl);
+                            this.avatarUrl = this.user.avatar;
                         })
                         .catch(error => {
                             console.error('获取用户信息失败:', error);

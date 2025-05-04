@@ -86,9 +86,9 @@
                             // 登录成功后检查是否有原始访问路径
                             axios.get('/XuJunxi_CloudMusic/user/getOriginalUrl')
                             .then(res => {
-                                if (res.data.originalUrl && res.data.originalUrl !== '/XuJunxi_CloudMusic/login.html' && res.data.originalUrl !== '/XuJunxi_CloudMusic/admin.html') {
+                                if (res.data.originalUrl && res.data.originalUrl !== '/XuJunxi_CloudMusic/login.html') {
                                     // 存在原始访问路径，跳转到原始访问路径
-                                    console.log(res.data.originalUrl);
+                                    alert('登陆成功')
                                     window.location.href = res.data.originalUrl;
                                     return;
                                 }
