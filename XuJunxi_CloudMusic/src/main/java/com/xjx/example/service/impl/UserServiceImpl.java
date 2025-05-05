@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
         try {
             return userDao.addUser(user);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("添加用户失败: {}", e.getMessage());
             return false;
         }
     }
@@ -38,8 +38,8 @@ public class UserServiceImpl implements UserService {
         try {
             return userDao.getUserById(id);
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("获取用户失败，请稍后重试");
+            logger.error("获取用户失败: {}", e.getMessage());
+            return null;
         }
     }
 
@@ -48,8 +48,8 @@ public class UserServiceImpl implements UserService {
         try {
             return userDao.getUserByUsername(username);
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("获取用户失败，请稍后重试");
+            logger.error("获取用户失败: {}", e.getMessage());
+            return null;
         }
     }
 
@@ -58,8 +58,8 @@ public class UserServiceImpl implements UserService {
         try {
             return userDao.getAllUsers();
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("获取用户列表失败，请稍后重试");
+            logger.error("获取所有用户失败: {}", e.getMessage());
+            return null;
         }
     }
 
@@ -68,8 +68,8 @@ public class UserServiceImpl implements UserService {
         try {
             return userDao.getUserByEmail(email);
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("通过邮箱获取用户失败，请稍后重试");
+            logger.error("获取用户失败: {}", e.getMessage());
+            return null;
         }
     }
 
@@ -78,7 +78,7 @@ public class UserServiceImpl implements UserService {
         try {
             return userDao.updateUser(user);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("更新用户失败: {}", e.getMessage());
             return false;
         }
     }
@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
         try {
             return userDao.deleteUser(id);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("删除用户失败: {}", e.getMessage());
             return false;
         }
     }
@@ -210,7 +210,7 @@ public class UserServiceImpl implements UserService {
             user.setWalletBalance(user.getWalletBalance().add(amount));
             return userDao.updateUser(user);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("充值钱包失败: {}", e.getMessage());
             return false;
         }
     }
@@ -242,7 +242,7 @@ public class UserServiceImpl implements UserService {
             user.setVipExpiry(newExpiry);
             return userDao.updateUser(user);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("购买VIP失败: {}", e.getMessage());
             return false;
         }
     }
@@ -260,7 +260,7 @@ public class UserServiceImpl implements UserService {
         try {
             return vipPlanDao.getAllPlans();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("获取所有VIP计划失败: {}", e.getMessage());
             return null;
         }
     }
